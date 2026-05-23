@@ -1,0 +1,8 @@
+*.tflite filter=lfs diff=lfs merge=lfs -text
+*.onnx filter=lfs diff=lfs merge=lfs -text
+*.pte filter=lfs diff=lfs merge=lfs -text
+*.h5 filter=lfs diff=lfs merge=lfs -text
+*_model_data.c filter=lfs diff=lfs merge=lfs -text
+*_model_data.h filter=lfs diff=lfs merge=lfs -text
+compute_sub_*.c filter=lfs diff=lfs merge=lfs -text
+compute_sub_*.h filter=lfs diff=lfs merge=lfs -text
