@@ -1,4 +1,4 @@
-# Renesas Model Zoo
+# RUHMI Model Zoo
 
 This repository is a model zoo and collection of example projects, notebooks, and model artifacts curated for the Renesas RA8P1 MCU (Arm Cortex-M85 + Ethos-U55 NPU). It demonstrates how to evaluate, quantize, compile and run neural network models for on-device inference on the RA8P1 using the RUHMI Framework stack.
 
