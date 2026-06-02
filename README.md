@@ -20,6 +20,7 @@ Top-level structure (important folders):
 - `tutorials/` — Notebooks that show end-to-end examples per task. E.g. `Image Classification, Object Detection etc`
 - `vision/` — Vision model collections organized by task (image classification, object detection, face detection).
 - `audio/` — Audio model collections organized by task (audio classification / keyword spotting).
+- `real_time_analytics/` — Real-time AI workloads (e.g. anomaly detection).
 
 ## Available Models
 
@@ -29,7 +30,7 @@ Top-level structure (important folders):
 | Object Detection | 2 | [View models](vision/object_detection/README.md) |
 | Face Detection | 1 | [View models](vision/face_detection/README.md) |
 | Audio Classification | 1 | [View models](audio/audio_classification/README.md) |
-| Anomaly Detection | 1 | [View models](audio/anomaly_detection/auto_encoder/README.md) |
+| Anomaly Detection | 1 | [View models](real_time_analytics/anomaly_detection/README.md) |
 
 > Each task README contains a detailed table of all models with dataset, input shape, accuracy, and per-model links.
 

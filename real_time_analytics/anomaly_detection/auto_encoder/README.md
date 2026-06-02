@@ -62,7 +62,7 @@ anomaly_detection/
     **Windows PowerShell**
 
     ```powershell
-    cd audio\anomaly_detection\python
+    cd real_time_analytics\anomaly_detection\auto_encoder\python
     python -m venv .venv_ad
     .\.venv_ad\Scripts\Activate.ps1
     pip install --upgrade pip
@@ -72,7 +72,7 @@ anomaly_detection/
     **Ubuntu / bash**
 
     ```bash
-    cd audio/anomaly_detection/auto_encoder/python
+    cd real_time_analytics/anomaly_detection/auto_encoder/python
     python3.10 -m venv .venv_ad
     source .venv_ad/bin/activate
     pip install --upgrade pip
@@ -110,7 +110,7 @@ Activate the **inference venv** and navigate to `python/`:
 **Windows PowerShell**
 
 ```powershell
-cd audio\anomaly_detection\python
+cd real_time_analytics\anomaly_detection\auto_encoder\python
 .\.venv_ad\Scripts\Activate.ps1
 python inference.py --audio sample_audio\anomaly_id_01_00000000.wav
 ```
@@ -118,7 +118,7 @@ python inference.py --audio sample_audio\anomaly_id_01_00000000.wav
 **Ubuntu / bash**
 
 ```bash
-cd audio/anomaly_detection/auto_encoder/python
+cd real_time_analytics/anomaly_detection/auto_encoder/python
 source .venv_ad/bin/activate
 python inference.py --audio sample_audio/anomaly_id_01_00000000.wav
 ```
@@ -162,8 +162,8 @@ This step converts the TFLite model into C-code for the RA8P1 MCU. Activate the 
 Open `python/config.yaml` and verify the paths match your system:
 
 ```yaml
-model_path: audio/anomaly_detection/auto_encoder/python/model/ad01_FP32.tflite
-output_dir: audio/anomaly_detection/auto_encoder/embedded_c/src_mcu
+model_path: real_time_analytics/anomaly_detection/auto_encoder/python/model/ad01_FP32.tflite
+output_dir: real_time_analytics/anomaly_detection/auto_encoder/embedded_c/src_mcu
 target: cpu        # 'cpu' → CMSIS-NN  |  'npu' → Ethos-U55 NPU
 quantize: true     # RUHMI will quantize FP32 → INT8 (better accuracy than pre-quantized)
 ```
@@ -182,14 +182,14 @@ Navigate back to the **repository root** and run the compiler with `.mera_venv` 
 
 ```powershell
 cd C:\Users\<you>\Model-zoo
-python ruhmi_tools\mcu_compile.py audio\anomaly_detection\python\config.yaml
+python ruhmi_tools\mcu_compile.py real_time_analytics\anomaly_detection\auto_encoder\python\config.yaml
 ```
 
 **Ubuntu / bash**
 
 ```bash
 cd ~/Model-zoo
-python ruhmi_tools/mcu_compile.py audio/anomaly_detection/auto_encoder/python/config.yaml
+python ruhmi_tools/mcu_compile.py real_time_analytics/anomaly_detection/auto_encoder/python/config.yaml
 ```
 
 The compiled C-code will be written to the `output_dir` specified in `config.yaml`.

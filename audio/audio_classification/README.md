@@ -14,9 +14,6 @@ This directory contains models for the **audio classification** task, targeting 
 audio_classification/
 ├── README.md              ← This file
 └── key_word_spotting/     ← DS-CNN Keyword Spotting
-    ├── README.md
-    ├── python/            ← Inference scripts, conversion tools, config
-    └── embedded_c/        ← Compiled C-code for MCU (CPU & NPU)
 ```
 
 ## Getting Started

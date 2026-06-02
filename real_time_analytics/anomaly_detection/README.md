@@ -1,4 +1,4 @@
-# Audio Classification
+# Anomaly Detection
 
 This directory contains models for the **anomaly detection** task, targeting the Renesas RA8P1 MCU (Cortex-M85 + Ethos-U55 NPU). Each subfolder holds a complete model package — pretrained weights, conversion scripts, inference code, compile configuration, and embedded C-code artifacts.
 
@@ -11,7 +11,7 @@ This directory contains models for the **anomaly detection** task, targeting the
 ## Directory Structure
 
 ```
-audio_classification/
+anomaly_detection/
 ├── README.md              ← This file
 └── auto_encoder/          ← AD Dense Autoencoder
 ```
