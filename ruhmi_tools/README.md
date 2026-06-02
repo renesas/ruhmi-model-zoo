@@ -26,72 +26,6 @@ Invoke-WebRequest -Uri "https://raw.githubusercontent.com/renesas/ruhmi-framewor
 
 For more details, visit [here](https://github.com/renesas/ruhmi-framework-mcu/tree/main/scripts)
 
----
-
-## Usage
-
-### Mode 1 — YAML Configuration (recommended)
-
-```bash
-python mcu_compile.py <config.yaml>
-```
-
-The script auto-detects YAML mode when the first argument ends in `.yaml` or `.yml`.
-
-**Example:**
-
-```bash
-# From the repository root, with .mera_venv active
-python ruhmi_tools/mcu_compile.py vision/image_classification/resnet8/python/config.yaml
-```
-
-### Mode 2 — CLI Arguments
-
-```bash
-python mcu_compile.py <model_path> <output_dir> --cpu|--npu [OPTIONS]
-```
-
-**Examples:**
-
-```bash
-# CPU compile (INT8 TFLite → CMSIS-NN C)
-python ruhmi_tools/mcu_compile.py model_INT8.tflite output/ --cpu
-
-# NPU compile with MERA quantization (FP32 → INT8 → Ethos-U55 C)
-python ruhmi_tools/mcu_compile.py model_FP32.tflite output/ --npu --quantize \
-    --calib-data calib_data.npy --calib-num 200
-
-# NPU compile from pre-quantized MERA file
-python ruhmi_tools/mcu_compile.py model.mera output/ --npu
-```
-
-### CLI Reference
-
-| Argument | Type | Default | Description |
-|----------|------|---------|-------------|
-| `model_path` | positional | — | Path to model file (`.tflite`, `.onnx`, `.pte`, `.mera`) or directory |
-| `output_dir` | positional | — | Output directory for compiled C-code |
-| `--cpu` | flag | — | Deploy for CPU using CMSIS-NN *(mutually exclusive with --npu)* |
-| `--npu` | flag | — | Deploy for NPU (Ethos-U55, requires INT8) *(mutually exclusive with --cpu)* |
-| `--quantize` | flag | `false` | Quantize FP32 model to INT8 before deployment |
-| `--calib-data` | str | `''` | Path to calibration data (`.npy` file or directory of `.npy` files) |
-| `--calib-num` | int | `5` | Number of calibration samples (used when `--calib-data` is empty) |
-| `--external` | flag | `false` | Force external memory mode (NPU: Vela OSPI; CPU: directory suffix) |
-| `--memory-threshold` | float | `0.8` | Size threshold (MB) for auto-detecting external memory need |
-| `--memory-mode` | str | `Sram_Only` | Vela memory mode: `Sram_Only` or `Shared_Sram` |
-| `--optimization` | str | `Performance` | Vela optimization: `Performance` or `Size` |
-| `--weight-loc` | str | `Flash` | Weight storage location: `Flash` or `Iram` |
-| `--suffix` | str | `''` | Suffix appended to generated C function names |
-| `--onnx-dims` | str | `''` | Freeze dynamic ONNX dims (e.g. `batch=1,width=224`) |
-| `--ref-data` | flag | `false` | Generate reference I/O `.npy` files for on-target testing |
-| `--x86` | flag | `false` | Generate x86 pybind11 bindings for manual host testing |
-| `--host-evaluate` | flag | `false` | Build & run C-code on host to validate outputs (CPU only, implies `--x86`) |
-| `--result` | str | `''` | Path to write JUnit XML test results |
-| `--version` | flag | — | Print script version and exit |
-
-> **Note:** Every CLI flag has an equivalent YAML field (e.g. `--calib-data` → `calib_data:`, `--memory-mode` → `memory_mode:`). The annotated `config.yaml` in the next section documents each field in full.
-
----
 
 ## Configuration Reference (`config.yaml`) — YAML Mode
 
@@ -147,7 +81,6 @@ verbose: false  # Print detailed output
 
 > **Note:** `model_path` and `output_dir` should be **absolute paths** to avoid ambiguity.
 
----
 
 
 ## Integration with the Model Zoo
