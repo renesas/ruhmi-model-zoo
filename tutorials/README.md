@@ -1,8 +1,8 @@
 # Tutorials
 
-This folder contains end-to-end Jupyter Notebook tutorials that walk through the full deployment pipeline for the Renesas RA8P1 MCU (Cortex-M85 + Ethos-U55 NPU) using the MERA (RUHMI) compiler.
+This folder contains end-to-end Jupyter Notebook tutorials that walk through the full deployment pipeline for the Renesas RA8P1 MCU (Cortex-M85 + Ethos-U55 NPU) using the RUHMI Framework stack.
 
-Each tutorial covers the complete workflow: model acquisition → conversion → quantization → inference validation → MERA compilation → embedded C generation.
+Each tutorial covers the complete workflow: model acquisition → conversion → quantization → inference validation → RUHMI AI MCU compilation (MERA 2.0 backend) → embedded C generation.
 
 ---
 

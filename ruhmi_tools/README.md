@@ -2,6 +2,8 @@
 
 This directory explains how to use `mcu_compile.py` script for compiling and deploying AI models to Renesas RA8P1 Microcontrollers (Cortex-M85 + Ethos-U55 NPU).
 
+RUHMI Framework is the Renesas BYOM framework and umbrella stack for customer models. In this repository workflow, AI MCU Compiler with MERA 2.0 backend are both within RUHMI Framework (MERA 2.0 powered by EdgeCortix integration).
+
 You can download mcu_compile.py script from the respective GitHub [here](https://github.com/renesas/ruhmi-framework-mcu/blob/main/scripts/mcu_compile.py) or via wget/Invoke commands in ruhmi_tools directory:
 
 Linux/WSL:
@@ -17,7 +19,7 @@ Invoke-WebRequest -Uri "https://raw.githubusercontent.com/renesas/ruhmi-framewor
 
 ## Overview
 
-`mcu_compile.py` is the unified compilation script that handles the full pipeline — model loading, quantization (FP32 → INT8), C-code generation (MERA / CMSIS-NN / Vela), and optional host-based validation. It supports **two input modes**:
+`mcu_compile.py` is the unified compilation script that handles the full pipeline — model loading, quantization (FP32 → INT8), C-code generation (MERA 2.0 / CMSIS-NN / Vela), and optional host-based validation. It supports **two input modes**:
 
 | Mode | When to use |
 |------|-------------|

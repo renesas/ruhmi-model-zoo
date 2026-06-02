@@ -1,15 +1,21 @@
 # Renesas Model Zoo
 
-This repository is a model zoo and collection of example projects, notebooks, and model artifacts curated for the Renesas RA8P1 MCU (Arm Cortex-M85 + Ethos-U55 NPU). It demonstrates how to evaluate, quantize, compile and run neural network models for on-device inference on the RA8P1 using the RUHMI toolchain.
+This repository is a model zoo and collection of example projects, notebooks, and model artifacts curated for the Renesas RA8P1 MCU (Arm Cortex-M85 + Ethos-U55 NPU). It demonstrates how to evaluate, quantize, compile and run neural network models for on-device inference on the RA8P1 using the RUHMI Framework stack.
 
 The repo is organized to separate compilation helpers and compiler-specific environment, and model-specific inference code and notebooks. It is intended as a benchmark showcase of models and workflows for embedded/edge deployment of these models on the RA8P1.
 
 ## Highlights
 
 - Target board: Renesas RA8P1 (Cortex-M85 + Ethos-U55 NPU)
-- Compilation/quantization workflow uses the RUHMI / MERA toolchain (compiler venv separate from inference venvs)
+- Compilation/quantization workflow uses RUHMI Framework (Renesas BYOM framework), which includes AI MCU Compiler with the MERA 2.0 backend (EdgeCortix integration)
 - Python 3.10 is the preferred runtime for all venvs (Windows and Ubuntu)
 - Per-model `requirements.txt` files are provided for inference dependencies (so you can create a model-specific venv)
+
+## Compiler Stack Terminology
+
+- RUHMI Framework: Renesas BYOM framework and umbrella stack used to bring customer models into the deployment flow.
+- AI MCU Compiler: Compiler component within RUHMI Framework used to quantize and generate deployable artifacts for RA8P1.
+- MERA 2.0 backend: Backend within RUHMI Framework used in this model zoo activity (EdgeCortix integration).
 
 ## Repository layout
 
