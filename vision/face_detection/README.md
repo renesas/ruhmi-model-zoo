@@ -14,9 +14,6 @@ This directory contains models for the **face detection** task, targeting the Re
 face_detection/
 ├── README.md              ← This file
 └── blazeface/             ← BlazeFace Front (128×128)
-    ├── README.md
-    ├── python/            ← Inference scripts, conversion tools, config
-    └── embedded_c/        ← Compiled C-code for MCU (CPU & NPU)
 ```
 
 ## Getting Started
