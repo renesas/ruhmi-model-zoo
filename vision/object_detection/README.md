@@ -15,13 +15,7 @@ This directory contains models for the **object detection** task, targeting the 
 object_detection/
 ├── README.md              ← This file
 ├── yolo_fastest_1_1/      ← YOLO-Fastest 1.1 (CPU-only)
-│   ├── README.md
-│   ├── python/
-│   └── embedded_c/
 └── yolox_tiny/            ← YOLOX-Tiny (CPU + NPU)
-    ├── README.md
-    ├── python/
-    └── embedded_c/
 ```
 
 ## Getting Started
