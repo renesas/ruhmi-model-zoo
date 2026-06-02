@@ -17,6 +17,7 @@ The repo is organized to separate compilation helpers and compiler-specific envi
 - AI MCU Compiler: Compiler component within RUHMI Framework used to quantize and generate deployable artifacts for RA8P1.
 - MERA 2.0 backend: Backend within RUHMI Framework used in this model zoo activity (EdgeCortix integration).
 
+
 ## Repository layout
 
 Top-level structure (important folders):
