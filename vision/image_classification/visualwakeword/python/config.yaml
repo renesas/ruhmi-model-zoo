@@ -1,0 +1,44 @@
+# =============================================================================
+# MCU Compile Configuration — Visual Wake Words (VWW, vww_96_INT8)
+# Usage (from repo root):
+#   python ruhmi_tools/compile.py vision/image_classification/visualwakeword/python/config.yaml
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# Model input and output paths  (relative to repo root)
+# ---------------------------------------------------------------------------
+model_path: vision/image_classification/visualwakeword/python/model/vww_96_INT8.tflite
+output_dir: vision/image_classification/visualwakeword/embedded_c/src_mcu
+
+# ---------------------------------------------------------------------------
+# Target platform
+# ---------------------------------------------------------------------------
+target: cpu        # 'cpu' → CMSIS-NN  |  'npu' → Ethos-U55 NPU (requires INT8)
+
+# ---------------------------------------------------------------------------
+# Quantization  (model is already INT8 — disable)
+# ---------------------------------------------------------------------------
+quantize: false
+
+# ---------------------------------------------------------------------------
+# Memory
+# ---------------------------------------------------------------------------
+external: false
+memory_threshold: 0.8
+memory_mode: Sram_Only
+weight_loc: Flash
+
+# ---------------------------------------------------------------------------
+# Calibration  (not needed — model already quantized)
+# ---------------------------------------------------------------------------
+calib_data: ''
+calib_num: 5
+
+# ---------------------------------------------------------------------------
+# Output options
+# ---------------------------------------------------------------------------
+suffix: ''
+ref_data: false
+x86: false
+host_evaluate: false
+verbose: false

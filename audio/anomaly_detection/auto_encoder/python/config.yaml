@@ -1,0 +1,68 @@
+# =============================================================================# ──────────────────────────────────────────────────────────────────────────────
+
+# MCU Compile Configuration — Anomaly Detection (Dense Autoencoder)# RUHMI Compilation Configuration — Anomaly Detection (AD Dense Autoencoder)
+
+# Usage (from repo root): python ruhmi_tools/mcu_compile.py audio/anomaly_detection/auto_encoder/python/config.yaml# ──────────────────────────────────────────────────────────────────────────────
+
+# =============================================================================# This file is consumed by  ruhmi_tools/mcu_compile.py
+
+# Paths are relative to the repository root.
+
+# ---------------------------------------------------------------------------
+
+# Required: Model input and output pathsmodel_path: audio/anomaly_detection/auto_encoder/python/model/ad01_FP32.tflite
+
+# ---------------------------------------------------------------------------output_dir: audio/anomaly_detection/auto_encoder/embedded_c/src_mcu
+
+model_path: audio/anomaly_detection/auto_encoder/python/model/ad01_FP32.tflite   # Path to model file (.tflite, .onnx, .pte) or directorytarget: cpu        # 'cpu' → CMSIS-NN  |  'npu' → Ethos-U55 NPU
+
+output_dir: audio/anomaly_detection/auto_encoder/embedded_c/src_mcu              # Output directory for compiled C-codequantize: true     # RUHMI will quantize FP32 → INT8 (better accuracy than pre-quantized)
+
+
+# ---------------------------------------------------------------------------
+# Required: Target platform — must be exactly 'cpu' or 'npu'
+# ---------------------------------------------------------------------------
+target: cpu        # 'cpu' → CMSIS-NN | 'npu' → Ethos-U55 (requires INT8)
+
+# ---------------------------------------------------------------------------
+# Quantization
+# ---------------------------------------------------------------------------
+quantize: true    # Set true to quantize FP32 model to INT8 before deploy
+
+# ---------------------------------------------------------------------------
+# External memory
+# ---------------------------------------------------------------------------
+external: false            # Set true to force external memory mode (enables Vela OSPI for NPU)
+memory_threshold: 0.8      # Model size threshold in MB for auto-detecting external memory need
+
+# ---------------------------------------------------------------------------
+# Calibration data (used when quantize: true)
+# ---------------------------------------------------------------------------
+calib_data: ''   # Path to calibration data (.npy file or directory). Leave empty for random data.
+calib_num: 5     # Number of calibration samples
+
+# ---------------------------------------------------------------------------
+# MERA / Vela configuration
+# ---------------------------------------------------------------------------
+memory_mode: Sram_Only    # 'Sram_Only' or 'Shared_Sram'
+optimization: Performance # 'Performance' or 'Size'
+weight_loc: Flash         # 'Flash' or 'Iram'
+suffix: ''                # Optional suffix appended to generated source file names
+
+# ---------------------------------------------------------------------------
+# ONNX options
+# ---------------------------------------------------------------------------
+onnx_dims: ''   # Freeze symbolic ONNX dimensions, e.g. 'batch=1,width=224,height=224'
+
+# ---------------------------------------------------------------------------
+# Evaluation options
+# ---------------------------------------------------------------------------
+ref_data: false        # Generate reference I/O data for testing
+x86: false             # Generate x86 pybind11 bindings for manual host testing
+host_evaluate: false   # Build and run on host to validate outputs (CPU only, implies x86)
+
+# ---------------------------------------------------------------------------
+# Output options
+# ---------------------------------------------------------------------------
+result: ''     # Path for JUnit XML output (leave empty to skip)
+verbose: false # Print detailed output

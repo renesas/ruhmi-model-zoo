@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Renesas Model Zoo Explorer</title>
+  <meta name="description"
+    content="Interactive explorer for quantized AI models optimized for Renesas RA8P1. Filter by hardware constraints and visualize accuracy vs latency trade-offs." />
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       CDN Dependencies — Zero-build architecture
+       ═══════════════════════════════════════════════════════════════ -->
+  <!-- Tailwind CSS Play CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Plotly.js for interactive charts -->
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+  <!-- Google Fonts — Inter for a premium SaaS feel -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet" />
+
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              200: '#bfdbfe',
+              300: '#93c5fd',
+              400: '#60a5fa',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Custom Styles — Premium SaaS aesthetic
+       ═══════════════════════════════════════════════════════════════ -->
+  <style>
+    /* ---------- Base ---------- */
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #f8fafc;
+    }
+
+    /* ---------- Custom Scrollbar ---------- */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    /* ---------- Range Slider ---------- */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: #e2e8f0;
+      outline: none;
+      transition: background 0.2s;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #3b82f6;
+      cursor: pointer;
+      box-shadow: 0 1px 4px rgba(59, 130, 246, 0.4);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.5);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border: none;
+      border-radius: 50%;
+      background: #3b82f6;
+      cursor: pointer;
+      box-shadow: 0 1px 4px rgba(59, 130, 246, 0.4);
+    }
+
+    /* ---------- Table ---------- */
+    .data-table th {
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+      transition: background 0.15s;
+    }
+
+    .data-table th:hover {
+      background: #e2e8f0;
+    }
+
+    .data-table th .sort-arrow {
+      opacity: 0.3;
+      margin-left: 4px;
+      font-size: 0.7em;
+    }
+
+    .data-table th.sorted-asc .sort-arrow,
+    .data-table th.sorted-desc .sort-arrow {
+      opacity: 1;
+      color: #3b82f6;
+    }
+
+    .data-table tbody tr {
+      transition: background 0.12s;
+    }
+
+    .data-table tbody tr:hover {
+      background: #eff6ff;
+    }
+
+    /* ---------- Tab Animation ---------- */
+    .tab-btn {
+      position: relative;
+      transition: color 0.2s;
+    }
+
+    .tab-btn::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: #3b82f6;
+      border-radius: 3px 3px 0 0;
+      transform: scaleX(0);
+      transition: transform 0.25s ease;
+    }
+
+    .tab-btn.active::after {
+      transform: scaleX(1);
+    }
+
+    .tab-btn.active {
+      color: #2563eb;
+      font-weight: 600;
+    }
+
+    /* ---------- Toggle Button ---------- */
+    .view-toggle-btn {
+      transition: all 0.2s;
+    }
+
+    .view-toggle-btn.active {
+      background: #3b82f6;
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+    }
+
+    /* ---------- Micro-animations ---------- */
+    .card-hover {
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card-hover:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    }
+
+    /* ---------- Stat Card Pulse ---------- */
+    @keyframes countUp {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .stat-animate {
+      animation: countUp 0.4s ease-out;
+    }
+
+    /* ---------- Fade-in for sections ---------- */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.35s ease-out;
+    }
+
+    /* ---------- Chip Badge ---------- */
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 10px;
+      border-radius: 9999px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    /* ---------- Highlight columns (clean, no color) ---------- */
+    .highlight-col {
+      font-weight: 600;
+    }
+
+    /* ---------- Responsive sidebar ---------- */
+    @media (max-width: 1024px) {
+      #sidebar {
+        display: none;
+      }
+
+      #main-content {
+        margin-left: 0 !important;
+      }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen bg-slate-50 text-slate-800">
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       HEADER / NAV BAR
+       ═══════════════════════════════════════════════════════════════ -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+    <div class="max-w-[1600px] mx-auto px-6 flex items-center justify-between h-16">
+      <!-- Logo / Title -->
+      <div class="flex items-center gap-3">
+        <div
+          class="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
+        </div>
+        <h1 class="text-lg font-bold text-slate-800 tracking-tight">
+          <span class="text-blue-600">Renesas Model Zoo</span> Explorer
+        </h1>
+      </div>
+
+      <!-- Nav Tabs -->
+      <nav class="flex items-center gap-8 h-full">
+        <button id="tab-catalog"
+          class="tab-btn active text-sm font-medium text-slate-500 h-full flex items-center px-1">
+          <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+          </svg>
+          Model Catalog
+        </button>
+      </nav>
+
+      <!-- Branding Badge -->
+      <div class="hidden md:flex items-center gap-2 text-xs text-slate-400">
+        <span
+          class="px-2 py-0.5 bg-emerald-50 text-emerald-700 font-semibold rounded-full text-[10px] uppercase tracking-wider">v1.0</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       VIEW 1: MODEL CATALOG
+       ═══════════════════════════════════════════════════════════════ -->
+  <div id="view-catalog" class="fade-in">
+    <div class="max-w-[1600px] mx-auto flex">
+
+      <!-- ─── LEFT SIDEBAR — FILTERS ─── -->
+      <aside id="sidebar"
+        class="w-72 min-w-[280px] bg-white border-r border-slate-200 p-5 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto flex-shrink-0">
+        <div class="flex items-center justify-between mb-5">
+          <h2 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Filters</h2>
+          <button onclick="resetFilters()"
+            class="text-xs text-blue-500 hover:text-blue-700 font-medium transition-colors">Reset All</button>
+        </div>
+
+        <!-- Device Dropdown -->
+        <div class="mb-5">
+          <label for="filter-device"
+            class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">Device</label>
+          <select id="filter-device" onchange="applyFilters()"
+            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
+            <option value="All">All Devices</option>
+          </select>
+        </div>
+
+        <!-- Task Dropdown -->
+        <div class="mb-5">
+          <label for="filter-task"
+            class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">Task</label>
+          <select id="filter-task" onchange="applyFilters()"
+            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
+            <option value="All">All Tasks</option>
+          </select>
+        </div>
+
+        <!-- Architecture Dropdown -->
+        <div class="mb-5">
+          <label for="filter-architecture"
+            class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">Architecture</label>
+          <select id="filter-architecture" onchange="applyFilters()"
+            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
+            <option value="All">All Architectures</option>
+          </select>
+        </div>
+
+        <!-- Dataset Dropdown (cascades from Task) -->
+        <div class="mb-5">
+          <label for="filter-dataset"
+            class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">Dataset</label>
+          <select id="filter-dataset" onchange="applyFilters()"
+            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
+            <option value="All">All Datasets</option>
+          </select>
+        </div>
+
+        <!-- Stats summary -->
+        <div class="mt-6 p-3 bg-slate-50 rounded-xl border border-slate-100">
+          <div class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-2">Matching Models</div>
+          <div id="filter-count" class="text-3xl font-black text-slate-800 stat-animate">10</div>
+          <div class="text-xs text-slate-400">of <span id="total-count">10</span> total</div>
+        </div>
+      </aside>
+
+      <!-- ─── MAIN CONTENT ─── -->
+      <main id="main-content" class="flex-1 p-6 min-w-0">
+
+        <!-- Stats Row (device-adaptive) -->
+        <div id="stats-row" class="grid grid-cols-3 gap-4 mb-6">
+          <div class="card-hover bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
+            <div class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Total Models</div>
+            <div id="stat-total" class="text-2xl font-black text-slate-800 mt-1 stat-animate">—</div>
+          </div>
+          <div class="card-hover bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
+            <div id="stat-perf-label" class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">
+              Architectures</div>
+            <div id="stat-perf" class="text-2xl font-black text-blue-600 mt-1 stat-animate">—</div>
+          </div>
+          <div class="card-hover bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
+            <div id="stat-extra-label" class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Tasks
+            </div>
+            <div id="stat-extra" class="text-2xl font-black text-amber-600 mt-1 stat-animate">—</div>
+          </div>
+        </div>
+
+        <!-- View Toggle -->
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Results</h2>
+          <div class="flex bg-slate-100 rounded-lg p-0.5">
+            <button id="toggle-graph" class="view-toggle-btn active text-xs font-medium px-4 py-1.5 rounded-md"
+              onclick="switchView('graph')">
+              <svg class="w-3.5 h-3.5 inline mr-1 -mt-0.5" fill="none" stroke="currentColor" stroke-width="2"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+              </svg>
+              Graph
+            </button>
+            <button id="toggle-table" class="view-toggle-btn text-xs font-medium px-4 py-1.5 rounded-md text-slate-500"
+              onclick="switchView('table')">
+              <svg class="w-3.5 h-3.5 inline mr-1 -mt-0.5" fill="none" stroke="currentColor" stroke-width="2"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18M3 18h18M3 6h18" />
+              </svg>
+              Table
+            </button>
+          </div>
+        </div>
+
+        <!-- Graph Container -->
+        <div id="graph-container" class="bg-white rounded-xl border border-slate-100 shadow-sm p-4 fade-in">
+          <div class="flex items-center gap-4 mb-3 pb-3 border-b border-slate-100">
+            <div class="flex items-center gap-2">
+              <label class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">X-Axis</label>
+              <select id="chart-x-axis" onchange="renderChart()"
+                class="border border-slate-200 rounded-lg px-2 py-1 text-xs bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                <option value="latencyCpu" selected>CPU Inference Speed (ms)</option>
+                <option value="latencyCpuNpu">CPU+NPU Inference Speed (ms)</option>
+                <option value="macs">MACs (M)</option>
+              </select>
+            </div>
+            <div class="flex items-center gap-2">
+              <label class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Y-Axis</label>
+              <select id="chart-y-axis" onchange="renderChart()"
+                class="border border-slate-200 rounded-lg px-2 py-1 text-xs bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                <option value="accuracy" selected>Accuracy (%)</option>
+                <option value="macs">MACs (M)</option>
+              </select>
+            </div>
+            <div class="flex items-center gap-4 ml-auto">
+              <label class="flex items-center gap-1.5 cursor-pointer">
+                <input type="checkbox" id="chart-pareto" onchange="renderChart()"
+                  class="w-3.5 h-3.5 rounded border-slate-300 text-blue-600" disabled />
+                <span class="text-[10px] text-slate-500">Pareto Frontier</span>
+              </label>
+              <label class="flex items-center gap-1.5 cursor-pointer">
+                <input type="checkbox" id="chart-log-x" onchange="renderChart()"
+                  class="w-3.5 h-3.5 rounded border-slate-300 text-blue-600" />
+                <span class="text-[10px] text-slate-500">Log X</span>
+              </label>
+            </div>
+          </div>
+          <div id="plotly-chart" style="width:100%; height:450px;"></div>
+          <!-- Pareto Helper Note -->
+          <div class="mt-5 pt-3 border-t border-slate-100 flex items-start gap-2 justify-center text-slate-400">
+            <svg class="w-4 h-4 text-sky-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor"
+              viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <p class="text-[11px] leading-relaxed">
+              <span class="font-semibold text-slate-500">Pareto Frontier:</span>
+              Select a specific <strong class="text-slate-600">Task</strong> and <strong
+                class="text-slate-600">Dataset</strong> from the sidebar to enable this feature. It visualizes the
+              optimal tradeoff between your chosen X and Y axes.
+            </p>
+          </div>
+        </div>
+
+        <!-- Table Container -->
+        <div id="table-container" class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden fade-in"
+          style="display:none;">
+          <div class="overflow-x-auto">
+            <table class="data-table w-full text-sm">
+              <thead id="table-head">
+                <!-- Rendered dynamically by JS based on device -->
+              </thead>
+              <tbody id="table-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       JAVASCRIPT — All Logic
+       ═══════════════════════════════════════════════════════════════ -->
+  <script>
+    // ─────────────────────────────────────────────────────────────
+    // DATA: Loaded from external models.json
+    // ─────────────────────────────────────────────────────────────
+    let MODEL_DATA = [];
+
+    // Architecture → Color mapping (expanded for 30+ families)
+    const ARCH_COLORS = {
+      YOLO: '#ef4444', 'YOLO-Fastest': '#64748b', YOLOX: '#ec4899', ResNet: '#3b82f6',
+      MobileNet: '#22c55e', MobileNetV1: '#22c55e', MobileNetV2: '#f59e0b', MobileNetV3: '#c2956b',
+      EfficientNet: '#8b5cf6',
+      DenseNet: '#f59e0b', HRNet: '#ec4899', GhostNet: '#14b8a6', RegNet: '#f97316',
+      RepVGG: '#06b6d4', Inception: '#a855f7', DarkNet: '#64748b', ConvNeXt: '#84cc16',
+      SqueezeNet: '#e11d48', DLA: '#0ea5e9', DPN: '#d946ef', Res2Net: '#0d9488',
+      SENet: '#ea580c', MnasNet: '#7c3aed', FBNet: '#2563eb', VoVNet: '#059669',
+      VisionTransformer: '#dc2626', SwinTransformer: '#9333ea', TinyML: '#f97316',
+      Other: '#94a3b8', MiDaS: '#f43f5e', Monodepth: '#6366f1', UNET: '#0891b2',
+      HardcoreNAS: '#ca8a04', SelecSLS: '#475569', 'PP-LCNet': '#16a34a', SCDepth: '#7e22ce',
+      'DS-CNN': '#f97316', BlazeFace: '#9333ea', Autoencoder: '#06b6d4',
+      ShuffleNetV2: '#14b8a6',
+    };
+
+    // ─────────────────────────────────────────────────────────────
+    // STATE
+    // ─────────────────────────────────────────────────────────────
+    let filteredData = [];
+    let currentView = 'graph';
+    let sortState = { col: null, asc: true };
+
+    // Helper: is current device selection MCU-based?
+    function isMCU() {
+      return document.getElementById('filter-device').value === 'RA8xx';
+    }
+    function isMPU() {
+      const d = document.getElementById('filter-device').value;
+      return d !== 'All' && d !== 'RA8xx';
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // INITIALIZATION — fetch data then boot UI
+    // ─────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      fetch('./models.json')
+        .then(r => r.json())
+        .then(data => {
+          MODEL_DATA = data;
+          bootUI();
+        })
+        .catch(() => {
+          document.getElementById('stat-total').textContent = 'ERR';
+          console.error('Failed to load models.json');
+        });
+    });
+
+    function bootUI() {
+      // Populate all dropdown filters from the data
+      populateDropdown('filter-device', 'device', 'All Devices');
+      populateDropdown('filter-task', 'task', 'All Tasks');
+      populateDropdown('filter-architecture', 'architecture', 'All Architectures');
+      populateDropdown('filter-dataset', 'dataset', 'All Datasets');
+      document.getElementById('total-count').textContent = MODEL_DATA.length;
+      applyFilters();
+    }
+
+    // Generic dropdown populator
+    function populateDropdown(selectId, field, allLabel) {
+      const sel = document.getElementById(selectId);
+      const cur = sel.value;
+      const vals = [...new Set(MODEL_DATA.map(m => m[field]).filter(v => v && v !== ''))].sort();
+      sel.innerHTML = `<option value="All">${allLabel}</option>`;
+      vals.forEach(v => {
+        const o = document.createElement('option');
+        o.value = v; o.textContent = v;
+        sel.appendChild(o);
+      });
+      if (vals.includes(cur)) sel.value = cur;
+    }
+
+
+
+    // ─────────────────────────────────────────────────────────────
+    // VIEW TOGGLE (Graph ↔ Table)
+    // ─────────────────────────────────────────────────────────────
+    function switchView(view) {
+      currentView = view;
+      const graphEl = document.getElementById('graph-container');
+      const tableEl = document.getElementById('table-container');
+      const btnG = document.getElementById('toggle-graph');
+      const btnT = document.getElementById('toggle-table');
+      if (view === 'graph') {
+        graphEl.style.display = ''; tableEl.style.display = 'none';
+        btnG.classList.add('active'); btnG.classList.remove('text-slate-500');
+        btnT.classList.remove('active'); btnT.classList.add('text-slate-500');
+        renderChart();
+      } else {
+        graphEl.style.display = 'none'; tableEl.style.display = '';
+        btnT.classList.add('active'); btnT.classList.remove('text-slate-500');
+        btnG.classList.remove('active'); btnG.classList.add('text-slate-500');
+        renderTable();
+      }
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // FILTER LOGIC
+    // ─────────────────────────────────────────────────────────────
+    function applyFilters() {
+      const device = document.getElementById('filter-device').value;
+      const task = document.getElementById('filter-task').value;
+      const arch = document.getElementById('filter-architecture').value;
+      const dataset = document.getElementById('filter-dataset').value;
+
+      // Cascade: update Architecture options based on filtered device+task
+      cascadeDropdown('filter-architecture', 'architecture', 'All Architectures', m => {
+        if (device !== 'All' && m.device !== device) return false;
+        if (task !== 'All' && m.task !== task) return false;
+        return true;
+      });
+      // Cascade: update Dataset options
+      cascadeDropdown('filter-dataset', 'dataset', 'All Datasets', m => {
+        if (device !== 'All' && m.device !== device) return false;
+        if (task !== 'All' && m.task !== task) return false;
+        return true;
+      });
+      // Cascade: update Task options based on device
+      cascadeDropdown('filter-task', 'task', 'All Tasks', m => {
+        if (device !== 'All' && m.device !== device) return false;
+        return true;
+      });
+
+      filteredData = MODEL_DATA.filter(m => {
+        if (device !== 'All' && m.device !== device) return false;
+        if (task !== 'All' && m.task !== task) return false;
+        if (arch !== 'All' && m.architecture !== arch) return false;
+        if (dataset !== 'All' && m.dataset !== dataset) return false;
+        return true;
+      });
+
+      // Update count
+      const countEl = document.getElementById('filter-count');
+      countEl.textContent = filteredData.length;
+      countEl.classList.remove('stat-animate');
+      void countEl.offsetWidth;
+      countEl.classList.add('stat-animate');
+
+      updateStats();
+
+      // Pareto only makes sense when Task AND Dataset are selected
+      const paretoCheckbox = document.getElementById('chart-pareto');
+      const paretoEnabled = task !== 'All' && dataset !== 'All';
+      paretoCheckbox.disabled = !paretoEnabled;
+      paretoCheckbox.parentElement.style.opacity = paretoEnabled ? '1' : '0.5';
+      paretoCheckbox.parentElement.style.cursor = paretoEnabled ? 'pointer' : 'not-allowed';
+      if (!paretoEnabled) paretoCheckbox.checked = false;
+
+      if (currentView === 'graph') renderChart();
+      else renderTable();
+    }
+
+    function cascadeDropdown(selectId, field, allLabel, predicate) {
+      const sel = document.getElementById(selectId);
+      const cur = sel.value;
+      const vals = [...new Set(MODEL_DATA.filter(predicate).map(m => m[field]).filter(v => v && v !== ''))].sort();
+      sel.innerHTML = `<option value="All">${allLabel}</option>`;
+      vals.forEach(v => { const o = document.createElement('option'); o.value = v; o.textContent = v; sel.appendChild(o); });
+      if (vals.includes(cur)) sel.value = cur; else sel.value = 'All';
+    }
+
+    function resetFilters() {
+      document.getElementById('filter-device').value = 'All';
+      document.getElementById('filter-task').value = 'All';
+      document.getElementById('filter-architecture').value = 'All';
+      document.getElementById('filter-dataset').value = 'All';
+      applyFilters();
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // STATS CARDS (device-adaptive)
+    // ─────────────────────────────────────────────────────────────
+    function updateStats() {
+      document.getElementById('stat-total').textContent = filteredData.length;
+      const uniqueArch = new Set(filteredData.map(m => m.architecture)).size;
+      const uniqueTasks = new Set(filteredData.map(m => m.task)).size;
+      document.getElementById('stat-perf-label').textContent = 'Architectures';
+      document.getElementById('stat-perf').textContent = uniqueArch;
+      document.getElementById('stat-extra-label').textContent = 'Tasks';
+      document.getElementById('stat-extra').textContent = uniqueTasks;
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // DEVICE-ADAPTIVE TABLE COLUMNS
+    // ─────────────────────────────────────────────────────────────
+    function getTableColumns() {
+      const base = [
+        { key: 'name', label: 'Model Name' },
+        { key: 'architecture', label: 'Architecture' },
+        { key: 'task', label: 'Task' },
+        { key: 'device', label: 'Device' },
+        { key: 'inputShape', label: 'Input Shape' },
+      ];
+      if (isMCU()) {
+        return [...base,
+        { key: 'flash', label: 'Flash (MB)' },
+        { key: 'ram', label: 'Peak RAM (MB)', highlight: true },
+        { key: 'macs', label: 'MACs (M)' },
+        { key: 'latencyCpu', label: 'CPU Inference Speed (ms)', highlight: true },
+        ];
+      }
+      if (isMPU()) {
+        return [...base,
+        { key: 'latencyCpu', label: 'CPU Inference Speed (ms)' },
+        { key: 'latencyCpuNpu', label: 'CPU+NPU Inference Speed (ms)', highlight: true },
+        ];
+      }
+      // "All" devices — show common columns only
+      return [...base,
+      { key: 'flash', label: 'Flash (MB)' },
+      { key: 'ram', label: 'Peak RAM (MB)' },
+      { key: 'macs', label: 'MACs (M)' },
+      { key: 'latencyCpu', label: 'CPU Inference Speed (ms)' },
+      { key: 'latencyCpuNpu', label: 'CPU+NPU Inference Speed (ms)' },
+      ];
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // PARETO FRONTIER COMPUTATION
+    // ─────────────────────────────────────────────────────────────
+    function computePareto(data, xField, yField) {
+      // Get models with valid x and y values
+      const valid = data.filter(m => m[xField] != null && m[yField] != null);
+      if (valid.length < 2) return null;
+
+      // Accuracy AND MACs (throughput) are both "higher is better"
+      const yHigherIsBetter = yField === 'accuracy' || yField === 'macs';
+
+      // Strict mathematical Pareto check:
+      // Sort by X ascending (lower latency = better). If X is tied, sort by best Y first.
+      const sorted = [...valid].sort((a, b) => {
+        if (a[xField] !== b[xField]) return a[xField] - b[xField];
+        return yHigherIsBetter ? b[yField] - a[yField] : a[yField] - b[yField];
+      });
+
+      const pareto = [];
+      let bestY = yHigherIsBetter ? -Infinity : Infinity;
+
+      for (const m of sorted) {
+        // Keep point only if Y is strictly better than the best Y seen so far
+        const isBetter = yHigherIsBetter ? m[yField] > bestY : m[yField] < bestY;
+        if (isBetter) {
+          bestY = m[yField];
+          pareto.push(m);
+        }
+      }
+
+      // Re-sort by X ascending for clean line drawing
+      pareto.sort((a, b) => a[xField] - b[xField]);
+
+      if (pareto.length < 2) return null;
+
+      return {
+        x: pareto.map(m => m[xField]),
+        y: pareto.map(m => m[yField]),
+        text: pareto.map(m => `<b>★ ${m.name}</b><br>Pareto Optimal`),
+        hoverinfo: 'text',
+        mode: 'lines+markers',
+        name: 'Pareto Frontier',
+        line: { color: 'rgba(239, 68, 68, 0.3)', width: 2.5, dash: 'dash' },
+        marker: { size: 8, color: 'rgba(239, 68, 68, 0.3)', symbol: 'star', line: { width: 1, color: 'rgba(255,255,255,0.5)' } },
+        type: 'scatter'
+      };
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // PLOTLY SCATTER CHART (user-selectable axes)
+    // ─────────────────────────────────────────────────────────────
+    const AXIS_LABELS = {
+      latencyCpu: 'CPU Inference Speed (ms)', latencyCpuNpu: 'CPU+NPU Inference Speed (ms)',
+      accuracy: 'Accuracy (%)', flash: 'Flash (MB)',
+      ram: 'RAM (MB)', macs: 'MACs (M)',
+    };
+
+    function renderChart() {
+      const archs = [...new Set(filteredData.map(m => m.architecture))];
+
+      const xField = document.getElementById('chart-x-axis').value;
+      const yField = document.getElementById('chart-y-axis').value;
+      const xTitle = AXIS_LABELS[xField] || xField;
+      const yTitle = AXIS_LABELS[yField] || yField;
+      const useLog = document.getElementById('chart-log-x').checked;
+
+      const traces = archs.map(arch => {
+        const items = filteredData.filter(m => m.architecture === arch && m[xField] != null && m[yField] != null);
+        if (items.length === 0) return null;
+        return {
+          x: items.map(m => m[xField]),
+          y: items.map(m => m[yField]),
+          text: items.map(m => {
+            let tip = `<b>${m.name}</b><br>Device: ${m.device}<br>Task: ${m.task}`;
+            if (m.dataset) tip += `<br>Dataset: ${m.dataset}`;
+            if (m.latencyCpu != null) tip += `<br>CPU Inference Speed: ${m.latencyCpu}ms`;
+            if (m.latencyCpuNpu != null) tip += `<br>CPU+NPU Inference Speed: ${m.latencyCpuNpu}ms`;
+            if (m.accuracy != null) tip += `<br>Accuracy: ${m.accuracy}%`;
+            return tip;
+          }),
+          hoverinfo: 'text', mode: 'markers', name: arch,
+          marker: {
+            size: 10,
+            color: ARCH_COLORS[arch] || '#94a3b8',
+            opacity: 0.8,
+            line: { width: 1.5, color: 'rgba(255,255,255,0.7)' }
+          },
+          type: 'scatter'
+        };
+      }).filter(Boolean);
+
+      // ── Pareto Frontier ──
+      if (document.getElementById('chart-pareto').checked) {
+        const paretoTrace = computePareto(filteredData, xField, yField);
+        if (paretoTrace) traces.push(paretoTrace);
+      }
+
+      const layout = {
+        xaxis: { title: { text: xTitle, font: { size: 13, color: '#64748b', family: 'Inter' } }, type: useLog ? 'log' : 'linear', gridcolor: '#f1f5f9', linecolor: '#e2e8f0', tickfont: { family: 'Inter', size: 11, color: '#94a3b8' }, zeroline: false },
+        yaxis: { title: { text: yTitle, font: { size: 13, color: '#64748b', family: 'Inter' } }, gridcolor: '#f1f5f9', linecolor: '#e2e8f0', tickfont: { family: 'Inter', size: 11, color: '#94a3b8' }, zeroline: false },
+        plot_bgcolor: '#fff', paper_bgcolor: '#fff',
+        margin: { t: 30, r: 30, b: 60, l: 70 },
+        legend: { orientation: 'h', yanchor: 'bottom', y: 1.02, xanchor: 'right', x: 1, font: { family: 'Inter', size: 11, color: '#475569' } },
+        hoverlabel: { bgcolor: '#1e293b', bordercolor: 'transparent', font: { family: 'Inter', size: 12, color: '#f8fafc' } },
+        font: { family: 'Inter' }
+      };
+
+      Plotly.newPlot('plotly-chart', traces, layout, {
+        responsive: true, displayModeBar: 'hover',
+        modeBarButtonsToRemove: ['lasso2d', 'select2d', 'autoScale2d', 'resetScale2d'],
+        displaylogo: false
+      });
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // SORTABLE TABLE (device-adaptive columns)
+    // ─────────────────────────────────────────────────────────────
+    function renderTable() {
+      const cols = getTableColumns();
+
+      // Render header
+      const thead = document.getElementById('table-head');
+      thead.innerHTML = `<tr class="bg-slate-50 border-b border-slate-200 text-left text-xs uppercase tracking-wider text-slate-500">
+        ${cols.map(c => `<th class="px-4 py-3 font-semibold ${c.highlight ? 'highlight-col' : ''}" data-col="${c.key}" onclick="sortTable('${c.key}')">${c.label} <span class="sort-arrow">▲</span></th>`).join('')}
+      </tr>`;
+
+      const tbody = document.getElementById('table-body');
+      tbody.innerHTML = '';
+
+      if (filteredData.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${cols.length}" class="px-4 py-10 text-center text-sm text-slate-400">
+          <svg class="w-8 h-8 mx-auto mb-2 text-slate-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+          No models match your filters.
+        </td></tr>`;
+        return;
+      }
+
+      filteredData.forEach((m, idx) => {
+        const row = document.createElement('tr');
+        row.className = 'border-b border-slate-100' + (idx % 2 === 0 ? '' : ' bg-slate-50/40');
+        row.innerHTML = cols.map(c => {
+          let val = m[c.key];
+          if (val == null || val === '') val = '—';
+          else if (typeof val === 'number') val = val.toLocaleString();
+          const hl = c.highlight ? 'highlight-col' : '';
+          return `<td class="px-4 py-3 ${hl} text-slate-700 text-xs">${val}</td>`;
+        }).join('');
+        tbody.appendChild(row);
+      });
+    }
+
+    function sortTable(col) {
+      if (sortState.col === col) { sortState.asc = !sortState.asc; }
+      else { sortState.col = col; sortState.asc = true; }
+
+      filteredData.sort((a, b) => {
+        let va = a[col] ?? '', vb = b[col] ?? '';
+        if (typeof va === 'string') { va = va.toLowerCase(); vb = vb.toLowerCase(); }
+        if (va < vb) return sortState.asc ? -1 : 1;
+        if (va > vb) return sortState.asc ? 1 : -1;
+        return 0;
+      });
+
+      document.querySelectorAll('.data-table th').forEach(th => {
+        th.classList.remove('sorted-asc', 'sorted-desc');
+        const arrow = th.querySelector('.sort-arrow');
+        if (arrow) arrow.textContent = '▲';
+      });
+      const activeH = document.querySelector(`.data-table th[data-col="${col}"]`);
+      if (activeH) {
+        activeH.classList.add(sortState.asc ? 'sorted-asc' : 'sorted-desc');
+        const arrow = activeH.querySelector('.sort-arrow');
+        if (arrow) arrow.textContent = sortState.asc ? '▲' : '▼';
+      }
+      renderTable();
+    }
+
+  </script>
+
+</body>
+
+</html>

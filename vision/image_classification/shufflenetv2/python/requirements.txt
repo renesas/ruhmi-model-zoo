@@ -1,0 +1,11 @@
+# ShuffleNetV2 x0.5 — Image Classification (ImageNet)
+# Python dependencies
+
+tensorflow>=2.13
+numpy
+Pillow>=9.0
+torch>=2.0          # required only for download_model.py (export to ONNX)
+torchvision>=0.15   # required only for download_model.py
+onnx>=1.14
+onnx2tf>=1.20
+tqdm

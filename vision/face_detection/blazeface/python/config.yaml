@@ -1,0 +1,58 @@
+# =============================================================================
+# MCU Compile Configuration — BlazeFace Front (Face Detection)
+# Usage (from repo root): python ruhmi_tools/mcu_compile.py vision/face_detection/blazeface/python/config.yaml
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# Required: Model input and output paths
+# ---------------------------------------------------------------------------
+model_path: vision/face_detection/blazeface/python/model/blazeface_front_int8.tflite   # Path to model file (.tflite)
+output_dir: vision/face_detection/blazeface/embedded_c/src_mcu                         # Output directory for compiled C-code
+
+# ---------------------------------------------------------------------------
+# Required: Target platform — must be exactly 'cpu' or 'npu'
+# ---------------------------------------------------------------------------
+target: cpu        # 'cpu' → CMSIS-NN | 'npu' → Ethos-U55 (requires INT8)
+
+# ---------------------------------------------------------------------------
+# Quantization
+# ---------------------------------------------------------------------------
+quantize: false    # Model is already INT8 — no further quantization needed
+
+# ---------------------------------------------------------------------------
+# External memory
+# ---------------------------------------------------------------------------
+external: false            # Set true to force external memory mode (enables Vela OSPI for NPU)
+memory_threshold: 0.8      # Model size threshold in MB for auto-detecting external memory need
+
+# ---------------------------------------------------------------------------
+# Calibration data (used when quantize: true)
+# ---------------------------------------------------------------------------
+calib_data: ''   # Path to calibration data (.npy file or directory). Leave empty for random data.
+calib_num: 5     # Number of calibration samples
+
+# ---------------------------------------------------------------------------
+# MERA / Vela configuration
+# ---------------------------------------------------------------------------
+memory_mode: Sram_Only    # 'Sram_Only' or 'Shared_Sram'
+optimization: Performance # 'Performance' or 'Size'
+weight_loc: Flash         # 'Flash' or 'Iram'
+suffix: ''                # Optional suffix appended to generated source file names
+
+# ---------------------------------------------------------------------------
+# ONNX options
+# ---------------------------------------------------------------------------
+onnx_dims: ''   # Freeze symbolic ONNX dimensions, e.g. 'batch=1,width=224,height=224'
+
+# ---------------------------------------------------------------------------
+# Evaluation options
+# ---------------------------------------------------------------------------
+ref_data: false        # Generate reference I/O data for testing
+x86: false             # Generate x86 pybind11 bindings for manual host testing
+host_evaluate: false   # Build and run on host to validate outputs (CPU only, implies x86)
+
+# ---------------------------------------------------------------------------
+# Output options
+# ---------------------------------------------------------------------------
+result: ''     # Path for JUnit XML output (leave empty to skip)
+verbose: false # Print detailed output

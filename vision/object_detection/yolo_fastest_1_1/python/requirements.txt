@@ -1,0 +1,10 @@
+# Yolo-Fastest Object Detection (TFLite)
+# Python dependencies
+
+tensorflow>=2.13
+opencv-python>=4.8
+numpy
+onnx>=1.14
+onnx2tf>=1.25
+torch>=2.0        # required only for download_model.py (Darknet→ONNX)
+tqdm
