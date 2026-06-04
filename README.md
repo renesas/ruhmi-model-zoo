@@ -4,7 +4,7 @@ This repository is a model zoo and collection of example projects, notebooks, an
 
 The repo is organized to separate compilation helpers and compiler-specific environment, and model-specific inference code and notebooks. It is intended as a benchmark showcase of models and workflows for embedded/edge deployment of these models on the RA8P1.
 
-![RUHMI Model Zoo Offering](./assets/Model_zoo_description_v2.png)
+![RUHMI Model Zoo Offering](./assets/Model_zoo_description.png)
 
 ## Highlights
 
