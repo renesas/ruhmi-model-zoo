@@ -1,6 +1,6 @@
 # RUHMI Model Zoo
 
-This repository is a model zoo and collection of example projects, notebooks, and model artifacts curated for the Renesas RA8P1 MCU (Arm Cortex-M85 + Ethos-U55 NPU). It demonstrates how to evaluate, quantize, compile and run neural network models for on-device inference on the RA8P1 using the RUHMI Framework stack.
+RUHMI Model zoo is a collection of models, notebooks, and model artifacts curated for Renesas Embedded platforms. It demonstrates how to evaluate, quantize, compile and run neural network models for on-device inference using the RUHMI Framework stack.
 
 The repo is organized to separate compilation helpers and compiler-specific environment, and model-specific inference code and notebooks. It is intended as a benchmark showcase of models and workflows for embedded/edge deployment of these models on the RA8P1.
 
@@ -26,7 +26,7 @@ Top-level structure (important folders):
 - `tutorials/` — Notebooks that show end-to-end examples per task. E.g. `Image Classification, Object Detection etc`
 - `vision/` — Vision model collections organized by task (image classification, object detection, face detection).
 - `audio/` — Audio model collections organized by task (audio classification / keyword spotting).
-- `real_time_analytics/` — Real-time AI workloads (e.g. anomaly detection).
+- `real_time_analytics/` — Real-time analytic model collections organized by task (e.g. anomaly detection).
 
 ## Available Models
 
@@ -86,5 +86,7 @@ Top-level structure (important folders):
 
     ```bash
     pip install notebook
+    pip install jupyter ipykernel
+    pip install --user --upgrade ipywidgets
     jupyter notebook tutorials/image_classification.ipynb
     ```

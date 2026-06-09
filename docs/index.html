@@ -513,11 +513,12 @@
 
     // Helper: is current device selection MCU-based?
     function isMCU() {
-      return document.getElementById('filter-device').value === 'RA8xx';
+      const d = document.getElementById('filter-device').value;
+      return d === 'RA8xx' || d === 'RA8P1';
     }
     function isMPU() {
       const d = document.getElementById('filter-device').value;
-      return d !== 'All' && d !== 'RA8xx';
+      return d !== 'All' && d !== 'RA8xx' && d !== 'RA8P1';
     }
 
     // ─────────────────────────────────────────────────────────────

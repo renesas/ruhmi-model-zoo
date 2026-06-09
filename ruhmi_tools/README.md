@@ -113,4 +113,4 @@ python ruhmi_tools/mcu_compile.py \
     --npu --quantize --calib-data calib_data.npy --calib-num 200
 ```
 
-Refer to each model's README (e.g. [ResNet README](../vision/image_classification/resnet8/README.md)) for model-specific compilation instructions.
+Refer to each model's README (e.g. [ResNet8 README](../vision/image_classification/resnet8/README.md)) for model-specific compilation instructions.
