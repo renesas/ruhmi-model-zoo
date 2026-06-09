@@ -2,7 +2,7 @@
   {
     "id": 1,
     "name": "ResNet8",
-    "task": "Classification",
+    "task": "Image Classification",
     "dataset": "CIFAR-10",
     "architecture": "ResNet",
     "device": "RA8P1",
@@ -19,7 +19,7 @@
   {
     "id": 2,
     "name": "MobileNetV1 (0.25x)",
-    "task": "Classification",
+    "task": "Image Classification",
     "dataset": "ImageNet",
     "architecture": "MobileNetV1",
     "device": "RA8P1",
@@ -36,7 +36,7 @@
   {
     "id": 3,
     "name": "MobileNetV2 (1.0x)",
-    "task": "Classification",
+    "task": "Image Classification",
     "dataset": "ImageNet",
     "architecture": "MobileNetV2",
     "device": "RA8P1",
@@ -53,7 +53,7 @@
   {
     "id": 4,
     "name": "SqueezeNet 1.1",
-    "task": "Classification",
+    "task": "Image Classification",
     "dataset": "ImageNet",
     "architecture": "SqueezeNet",
     "device": "RA8P1",
@@ -70,7 +70,7 @@
   {
     "id": 5,
     "name": "Visual Wake Words",
-    "task": "Classification",
+    "task": "Image Classification",
     "dataset": "COCO VWW",
     "architecture": "MobileNetV1",
     "device": "RA8P1",
@@ -172,7 +172,7 @@
   {
     "id": 11,
     "name": "MobileNetV3",
-    "task": "Classification",
+    "task": "Image Classification",
     "dataset": "ImageNet",
     "architecture": "MobileNetV3",
     "device": "RA8P1",
@@ -188,8 +188,8 @@
   },
   {
     "id": 12,
-    "name": "ShuffleNetV2",
-    "task": "Classification",
+    "name": "ShuffleNetV2 (0.5x)",
+    "task": "Image Classification",
     "dataset": "ImageNet",
     "architecture": "ShuffleNetV2",
     "device": "RA8P1",
