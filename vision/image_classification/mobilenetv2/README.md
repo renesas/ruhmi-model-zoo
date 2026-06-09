@@ -22,10 +22,10 @@ Accuracy measured on the ImageNet-1k validation set (50 000 images).
 
 | Model Variant | Format | Top-1 (%) | Top-5 (%) |
 |---------------|--------|:---------:|:---------:|
-| TFLite FP32 | `.tflite` | 69.87 | 89.40 |
-| TFLite INT8 | `.tflite` | 68.96 | 88.63 |
+| TFLite FP32 | `.tflite` | 57.67 | 80.78 |
+| TFLite INT8 | `.tflite` | 57.07 | 80.42 |
 | MERA FP32 | `.mera` | 57.67 | 80.78 |
-| MERA INT8 (TFLite Quantized) | `.mera` | 57.07 | 80.33 |
+| MERA INT8 (TFLite Quantized) | `.mera` | 57.05 | 80.30 |
 
 > [!NOTE]
 > The model was compiled using `mera-2.5.0+pkg.3577` and `FSP 6.2` was used for building and testing the project.

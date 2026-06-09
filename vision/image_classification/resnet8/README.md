@@ -22,10 +22,10 @@ Accuracy measured on the CIFAR-10 test set (10 000 images).
 
 | Model Variant | Format | Accuracy (%) |
 |---------------|--------|:------------:|
-| TFLite FP32 | `.tflite` | 87.19 |
-| TFLite INT8 | `.tflite` | 86.82 |
-| MERA FP32 | `.mera` | 87.19 |
-| MERA Quantised INT8 | `.mera` | 86.02 |
+| TFLite FP32 | `.tflite` | 89.80 |
+| TFLite INT8 | `.tflite` | 89.36 |
+| MERA FP32 | `.mera` | 89.80 |
+| MERA Quantised INT8 | `.mera` | 88.64 |
 
 > [!NOTE]
 > The model was compiled using `mera-2.5.0+pkg.3577` and `FSP 6.2` was used for building and testing the project.

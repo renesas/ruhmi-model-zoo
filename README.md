@@ -4,8 +4,6 @@ This repository is a model zoo and collection of example projects, notebooks, an
 
 The repo is organized to separate compilation helpers and compiler-specific environment, and model-specific inference code and notebooks. It is intended as a benchmark showcase of models and workflows for embedded/edge deployment of these models on the RA8P1.
 
-![RUHMI Model Zoo Offering](./assets/Model_zoo_description.png)
-
 ## Highlights
 
 - Target board: Renesas RA8P1 (Cortex-M85 + Ethos-U55 NPU)
@@ -24,7 +22,6 @@ The repo is organized to separate compilation helpers and compiler-specific envi
 
 Top-level structure (important folders):
 
-- `datasets/` — Directory containing files related to the supported Datasets for this Model Zoo.
 - `ruhmi_tools/` — Generic compilation and RUHMI integration code. It contains compilation flows and shared code.
 - `tutorials/` — Notebooks that show end-to-end examples per task. E.g. `Image Classification, Object Detection etc`
 - `vision/` — Vision model collections organized by task (image classification, object detection, face detection).

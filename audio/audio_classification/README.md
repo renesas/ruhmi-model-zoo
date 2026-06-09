@@ -6,7 +6,7 @@ This directory contains models for the **audio classification** task, targeting 
 
 | Model | Dataset | Input Shape | Classes | README |
 |-------|---------|:-----------:|:-------:|:--------|
-| Keyword Spotting (DS-CNN) | Google Speech Commands v0.02 | (1, 49, 10) | 12 | [Link](key_word_spotting/README.md) |
+| Keyword Spotting (DS-CNN) | Google Speech Commands v0.02 | (1, 49, 10, 1) | 12 | [Link](key_word_spotting/README.md) |
 
 ## Directory Structure
 

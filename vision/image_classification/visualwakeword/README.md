@@ -26,8 +26,8 @@ Accuracy measured on the VWW COCO val2014 test subset.
 
 | Model Variant | Format | Accuracy (%) |
 |---------------|--------|:------------:|
-| TFLite FP32 | `.tflite` | 84.20 |
-| TFLite INT8 | `.tflite` | 83.50 |
+| TFLite FP32 | `.tflite` | 83.18 |
+| TFLite INT8 | `.tflite` | 83.04 |
 | MERA FP32 | `.mera` |  83.18 |
 | MERA INT8(TFLite Quantized) | `.mera` | 83.05 |
 

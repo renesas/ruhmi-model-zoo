@@ -4,9 +4,9 @@ This directory contains models for the **anomaly detection** task, targeting the
 
 ## Available Models
 
-| Model | Dataset | Input Shape | Classes | README |
-|-------|---------|:-----------:|:-------:|:--------|
-| AD Dense Autoencoder (ad01) | DCASE 2020 Task 2 — ToyCar| (1, 640) | 12 | [Link](auto_encoder/README.md) |
+| Model | Dataset | Input Shape | Metric | README |
+|-------|---------|:-----------:|:------:|:--------|
+| AD Dense Autoencoder (ad01) | DCASE 2020 Task 2 — ToyCar | (1, 640) | AUC / pAUC | [Link](auto_encoder/README.md) |
 
 ## Directory Structure
 
