@@ -13,13 +13,6 @@ The repo is organized to separate compilation helpers and compiler-specific envi
 - Python 3.10 is the preferred runtime for all venvs (Windows and Ubuntu)
 - Per-model `requirements.txt` files are provided for inference dependencies (so you can create a model-specific venv)
 
-## Compiler Stack Terminology
-
-- RUHMI Framework: Renesas BYOM framework and umbrella stack used to bring customer models into the deployment flow.
-- AI MCU Compiler: Compiler component within RUHMI Framework used to quantize and generate deployable artifacts for RA8P1.
-- MERA 2.0 backend: Backend within RUHMI Framework used in this model zoo activity (EdgeCortix integration).
-
-
 ## Repository layout
 
 Top-level structure (important folders):
