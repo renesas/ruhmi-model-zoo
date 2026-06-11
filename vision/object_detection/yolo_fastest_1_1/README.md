@@ -3,7 +3,7 @@
 YOLO-Fastest is an ultra-lightweight anchor-based object detector ([dog-qiuqiu, 2020](https://github.com/dog-qiuqiu/Yolo-Fastest)) optimised for embedded and mobile deployment.It achieves real-time detection on resource-constrained MCUs. This folder contains everything needed to obtain the model, convert it to TFLite, compile it for the Renesas RA8P1 (Cortex-M85) using the RUHMI toolchain, and run inference.
 
 > [!IMPORTANT]
-> This model supports **CPU-only** deployment (CMSIS-NN). NPU (Ethos-U55) is **not supported**.
+> This model supports **CPU-only** deployment (CMSIS-NN). NPU (Ethos-U55) via RUHMI AI MCU Compiler is currently being patched.
 
 ---
 
@@ -36,7 +36,7 @@ Evaluated on COCO val2017 (4952 images), mAP computed at IoU=0.5 and IoU=0.5:0.9
 
 ### Inference Performance (RA8P1)
 
-Measured on-target (Cortex-M85 @ 1 GHz). AI-only latency. **CPU-only — NPU not supported.**
+Measured on-target (Cortex-M85 @ 1 GHz). AI-only latency. **CPU-only — NPU not supported yet.**
 
 | Memory Configuration | CPU (ms) |
 |----------------------|:--------:|
@@ -62,7 +62,7 @@ yolo_fastest_1_1/
     **Windows PowerShell**
 
     ```powershell
-    cd vision\object_detection\yolo_fastest\python
+    cd vision\object_detection\yolo_fastest_1_1\python
     python -m venv .venv_yolof
     .\.venv_yolof\Scripts\Activate.ps1
     pip install --upgrade pip
@@ -110,7 +110,7 @@ Activate the **inference venv** and navigate to `python/`:
 **Windows PowerShell**
 
 ```powershell
-cd vision\object_detection\yolo_fastest\python
+cd vision\object_detection\yolo_fastest_1_1\python
 .\.venv_yolof\Scripts\Activate.ps1
 python inference.py --image sample_images\000000000139.jpg
 ```
