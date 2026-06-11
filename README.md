@@ -4,6 +4,8 @@ RUHMI Model zoo is a collection of models, notebooks, and model artifacts curate
 
 The repo is organized to separate compilation helpers and compiler-specific environment, and model-specific inference code and notebooks. It is intended as a benchmark showcase of models and workflows for embedded/edge deployment of these models on the RA8P1.
 
+![RUHMI Model Zoo Overview](./assets/model_zoo_overview.png)
+
 ## Highlights
 
 - Target board: Renesas RA8P1 (Cortex-M85 + Ethos-U55 NPU)
