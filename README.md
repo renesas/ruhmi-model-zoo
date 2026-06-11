@@ -66,8 +66,7 @@ Top-level structure (important folders):
         ```bash
         sudo apt-get install git-lfs
         git lfs install
-        git lfs pull
-        ```
+       ```
 
     
     > If you clone without Git LFS installed, model files and embedded C artifacts will be small pointer files instead of real content. Run `git lfs pull` after installing Git LFS to fetch them.
@@ -77,7 +76,9 @@ Top-level structure (important folders):
     ```bash
     git clone https://github.com/renesas/ruhmi-model-zoo.git
     cd ruhmi-model-zoo
-    ```
+    git lfs pull
+
+	```
 
 3. Compiler installation (one-time) — create and configure the compiler venv
 
