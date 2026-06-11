@@ -66,6 +66,7 @@ Top-level structure (important folders):
         ```bash
         sudo apt-get install git-lfs
         git lfs install
+        git lfs pull
         ```
 
     
