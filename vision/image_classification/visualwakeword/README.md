@@ -213,14 +213,14 @@ Navigate back to the **repository root** and run the compiler with `.mera_venv` 
 **Ubuntu / bash**
 
 ```bash
-cd ~/Model-zoo
+cd ~/ruhmi-model-zoo
 python ruhmi_tools/mcu_compile.py vision/image_classification/visualwakeword/python/config.yaml
 ```
 
 **Windows PowerShell**
 
 ```powershell
-cd C:\Users\<you>\Model-zoo
+cd C:\Users\<you>\ruhmi-model-zoo
 python ruhmi_tools\mcu_compile.py vision\image_classification\visualwakeword\python\config.yaml
 ```
 

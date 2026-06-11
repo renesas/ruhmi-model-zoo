@@ -181,14 +181,14 @@ Navigate back to the **repository root** and run the compiler with `.mera_venv` 
 **Windows PowerShell**
 
 ```powershell
-cd C:\Users\<you>\Model-zoo
+cd C:\Users\<you>\ruhmi-model-zoo
 python ruhmi_tools\mcu_compile.py real_time_analytics\anomaly_detection\auto_encoder\python\config.yaml
 ```
 
 **Ubuntu / bash**
 
 ```bash
-cd ~/Model-zoo
+cd ~/ruhmi-model-zoo
 python ruhmi_tools/mcu_compile.py real_time_analytics/anomaly_detection/auto_encoder/python/config.yaml
 ```
 

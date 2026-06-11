@@ -174,14 +174,14 @@ Navigate to the **repository root** and run the compiler with `.mera_venv` activ
 **Windows PowerShell**
 
 ```powershell
-cd C:\Users\<you>\Model-zoo
+cd C:\Users\<you>\ruhmi-model-zoo
 python ruhmi_tools\mcu_compile.py vision\object_detection\yolox_tiny\python\config.yaml
 ```
 
 **Ubuntu / bash**
 
 ```bash
-cd ~/Model-zoo
+cd ~/ruhmi-model-zoo
 python ruhmi_tools/mcu_compile.py vision/object_detection/yolox_tiny/python/config.yaml
 ```
 
