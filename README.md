@@ -44,47 +44,35 @@ Top-level structure (important folders):
 
 ## Quick start
 
-1. Install prerequisites
+1. Install prerequisites & clone repo
 
     - **Python 3.10** — required for all virtual environments.
-    - **Git LFS** — required to download model files (`.tflite`) and pre-built embedded C artifacts. Install before cloning:
-
-        **Windows (winget)**
-        ```powershell
-        winget install GitHub.GitLFS
-        git lfs install
-        ```
-
-        **Ubuntu / bash**
-        ```bash
-        sudo apt-get install git-lfs
-        git lfs install
-       ```
-
+    - **Git LFS** — required to download model files (`.tflite`) and pre-built 
     
     > If you clone without Git LFS installed, model files and embedded C artifacts will be small pointer files instead of real content. Run `git lfs pull` after installing Git LFS to fetch them.
 
-2. Clone the repo
-
     ```bash
+    sudo apt-get install git-lfs
+    git lfs install
     git clone https://github.com/renesas/ruhmi-model-zoo.git
     cd ruhmi-model-zoo
     git lfs pull
-
 	```
 
-3. Compiler installation (one-time) — create and configure the compiler venv
+2. Compiler installation (one-time) — create and configure the compiler venv
 
-    The RUHMI/MERA compilation toolchain requires a contained environment that may include low-level or platform-specific wheel files. Create a dedicated compiler venv (eg: `.mera_venv`) and use it only when compiling or quantizing models.
+    The RUHMI/MERA compilation toolchain requires a contained environment that  includes low-level or platform-specific wheel files. Create a dedicated compiler venv (eg: `.mera_venv`) and use it only when compiling or quantizing models.
 
     Download RUHMI AI MCU compiler from its respective [GitHub](https://github.com/renesas/ruhmi-framework-mcu/tree/main) and follow the installation instructions [here](https://github.com/renesas/ruhmi-framework-mcu/tree/main/install).
 
-4. Inference venv setup (per model)
+3. Inference venv setup (per model)
 
     Each model includes a `requirements.txt` in its `python/` directory. Create a dedicated venv for the model you want to run:
     > In most cases inference dependencies are similar across models (TensorFlow, NumPy, Pillow). You can reuse the same venv across models in the same task category, but a per-model venv is the safest approach to avoid version conflicts.
 
+4. Benchmark model on platform (per model)
 
+    Each model includes the compiled models in `.c\.h` format for both CPU and CPU+NPU compilation. The models can be ported into the [inference benchmarking project](https://github.com/renesas/ruhmi-framework-mcu/tree/main/docs/benchmark) to quickly measure the inference cycles.
 
 ### Virtual Environment Best Practices
 
