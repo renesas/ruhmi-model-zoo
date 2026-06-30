@@ -36,8 +36,8 @@ Each tutorial covers the complete workflow: model acquisition → conversion →
     .\.venv_tutorials\Scripts\Activate.ps1
     pip install --upgrade pip
     pip install jupyter ipykernel
-    pip install --user --upgrade ipywidgets
-    python -m ipykernel install --user --name=venv_tutorials --display-name "Python (venv_tutorials)"
+    pip install --upgrade ipywidgets
+    python -m ipykernel install --name=venv_tutorials --display-name "Python (venv_tutorials)"
     ```
 
     **Ubuntu / bash**
@@ -48,8 +48,8 @@ Each tutorial covers the complete workflow: model acquisition → conversion →
     source .venv_tutorials/bin/activate
     pip install --upgrade pip
     pip install jupyter ipykernel
-    pip install --user --upgrade ipywidgets
-    python -m ipykernel install --user --name=venv_tutorials --display-name "Python (venv_tutorials)"
+    pip install --upgrade ipywidgets
+    python -m ipykernel install --name=venv_tutorials --display-name "Python (venv_tutorials)"
     ```
 
 2. **Select the kernel in VS Code** — click the kernel picker (top-right of the notebook) and choose **"Python (venv_tutorials)"**.
