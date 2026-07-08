@@ -111,7 +111,7 @@
     "format": "TFLite",
     "inputShape": "(128,128)",
     "latencyCpu": 36,
-    "latencyCpuNpu": 0.033,
+    "latencyCpuNpu": 3,
     "flash": 0.17,
     "ram": 0.38,
     "macs": 0.26,
