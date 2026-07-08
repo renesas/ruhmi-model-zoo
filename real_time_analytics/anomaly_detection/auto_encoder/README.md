@@ -37,8 +37,8 @@ Measured on-target (Cortex-M85 @ 1 GHz, Ethos-U55 NPU @ 500 MHz). AI-only latenc
 
 | Memory Configuration | CPU (ms) | NPU (ms) |
 |----------------------|:--------:|:--------:|
-| † Internal Flash + Internal SRAM | 54 | 28 |
-| ¶ Internal SRAM only | 44 | 29 |
+| † Internal Flash + Internal SRAM | 0.226 | 0.132 |
+
 
 ---
 
