@@ -1,11 +1,11 @@
 /**
  * @file    model_metadata.h
- * @brief   Compile-time metadata for MobileNetV1 INT8 TFLite model.
+ * @brief   Compile-time metadata for MobileNetV2 INT8 TFLite model.
  *
  *
  * Generated from:
- *   Model  : mobilenet_v1_INT8.tflite
- *   Python : inference.py  (MobileNetV1, ImageNet 1000-class, INT8)
+ *   Model  : mobilenet_v2_INT8.tflite
+ *   Python : inference.py  (MobileNetV2, ImageNet 1000-class, INT8)
  *   Date   : 2026-04-02
  *
  * ──────────────────────────────────────────────────────────────────────
@@ -43,13 +43,13 @@ extern "C" {
  * ══════════════════════════════════════════════════════════════════════ */
 
 /** Human-readable model name. */
-#define MODEL_NAME          "MobileNetV1"
+#define MODEL_NAME          "MobileNetV2"
 
 /** Relative path to the INT8 TFLite flatbuffer (from project root). */
-#define MODEL_FILE_INT8     "mobilenet_v1_INT8.tflite"
+#define MODEL_FILE_INT8     "mobilenet_v2_INT8.tflite"
 
 /** Relative path to the FP32 TFLite flatbuffer (for reference / validation). */
-#define MODEL_FILE_FP32     "mobilenet_v1_FP32.tflite"
+#define MODEL_FILE_FP32     "mobilenet_v2_FP32.tflite"
 
 /** Task performed by the model. */
 #define MODEL_TASK          "Image Classification"
@@ -107,7 +107,7 @@ extern "C" {
 #define INPUT_ZP            (-1)
 
 /**
- * Pixel normalization applied BEFORE quantization (MobileNetV1 standard):
+ * Pixel normalization applied BEFORE quantization (MobileNetV2 standard):
  *   normalized = raw_pixel / 127.5 - 1.0    →  range [-1.0, 1.0]
  *
  * Full pipeline (uint8 pixel → int8 tensor value):
