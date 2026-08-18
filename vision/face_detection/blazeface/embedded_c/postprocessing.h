@@ -17,7 +17,7 @@ extern "C" {
 
 /* ── Detection result ────────────────────────────────────────────────── */
 
-#include "../common/model_metadata.h"
+#include "model_metadata.h"
 
 /** Maximum number of detections returned after NMS (sourced from model_metadata.h). */
 #define BF_MAX_DETECTIONS  POSTPROC_MAX_DETS

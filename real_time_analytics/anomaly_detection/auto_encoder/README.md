@@ -38,7 +38,7 @@ Measured on-target (Cortex-M85 @ 1 GHz, Ethos-U55 NPU @ 500 MHz). AI-only latenc
 | Memory Configuration | CPU (ms) | NPU (ms) |
 |----------------------|:--------:|:--------:|
 | † Internal Flash + Internal SRAM | 0.226 | 0.132 |
-
+| ¶ Internal SRAM only | 0.225 | 0.133 |
 
 ---
 
@@ -56,17 +56,18 @@ anomaly_detection/
 
 ## Prerequisites
 
-1. **Python 3.10** installed (see [Install Python 3.10](../../README.md#install-python-310) in the top-level README for platform-specific steps).
+1. **Python 3.10** installed.
 2. **Inference venv** — navigate to the `python/` directory and create a dedicated virtual environment:
 
     **Windows PowerShell**
+    > **Note:** If venv activation is blocked by PowerShell execution policy ("running scripts is disabled"), run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` in the same PowerShell window, then run the activation command again.
 
     ```powershell
     cd real_time_analytics\anomaly_detection\auto_encoder\python
-    python -m venv .venv_ad
+    py -3.10 -m venv .venv_ad
     .\.venv_ad\Scripts\Activate.ps1
-    pip install --upgrade pip
-    pip install -r requirements.txt
+    python -m pip install --upgrade pip
+    python -m pip install -r requirements.txt
     ```
 
     **Ubuntu / bash**
@@ -99,7 +100,7 @@ Use `download_model.py` to build and convert the model. Activate the **inference
 python download_model.py
 ```
 
-The script will automatically download the Keras `.h5` model from MLCommons Tiny and the DCASE 2020 ToyCar training dataset (from Zenodo) for INT8 calibration. Use `--mode fp32` to skip INT8 or `--mode int8` for INT8 only. Output files are written to `python/model/`.
+The script will automatically download the Keras `.h5` model from MLCommons Tiny and the DCASE 2020 ToyCar training dataset (from Zenodo) for INT8 calibration. Use `--mode fp32` to skip INT8 or `--mode int8` for INT8 only. Use `--calib-dir` to point to a pre-downloaded dataset. Output files are written to `python/model/`.
 
 ---
 
@@ -181,14 +182,14 @@ Navigate back to the **repository root** and run the compiler with `.mera_venv` 
 **Windows PowerShell**
 
 ```powershell
-cd C:\Users\<you>\ruhmi-model-zoo
+cd C:\Users\<you>\Model-zoo
 python ruhmi_tools\mcu_compile.py real_time_analytics\anomaly_detection\auto_encoder\python\config.yaml
 ```
 
 **Ubuntu / bash**
 
 ```bash
-cd ~/ruhmi-model-zoo
+cd ~/Model-zoo
 python ruhmi_tools/mcu_compile.py real_time_analytics/anomaly_detection/auto_encoder/python/config.yaml
 ```
 

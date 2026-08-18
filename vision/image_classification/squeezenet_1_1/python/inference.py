@@ -16,7 +16,7 @@ tf.get_logger().setLevel("ERROR")
 # Defaults  (paths are relative to this script's directory: python/)
 # ──────────────────────────────────────────────────────────────────────────────
 BASE_DIR     = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH   = os.path.join(BASE_DIR, "model", "squeezenet1_1_INT8.tflite")
+MODEL_PATH   = os.path.join(BASE_DIR, "model", "squeezenet1_1_FP32.tflite")
 LABELS_PATH  = os.path.join(BASE_DIR, "utils", "imagenet_labels.txt")
 
 # Inference settings
@@ -124,7 +124,8 @@ def run_tflite_inference(model_path:  str,
                          labels:      List[str],
                          top_k:       int = TOP_K) -> List[Tuple[int, str, float]]:
     """
-    Load the TFLite FP32 model and run a single-image inference.
+    Load a TFLite model and run a single-image inference.
+    Automatically handles FP32 and INT8/UINT8 input/output tensors.
 
     Returns
     -------
@@ -136,17 +137,29 @@ def run_tflite_inference(model_path:  str,
     input_details  = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
 
-    input_tensor = preprocess(image_path, INPUT_HEIGHT, INPUT_WIDTH)
+    input_shape = input_details[0]["shape"]  # (1, H, W, 3)
+    height, width = int(input_shape[1]), int(input_shape[2])
+    input_tensor = preprocess(image_path, height, width)
 
-    assert input_details[0]["dtype"] == np.float32, (
-        f"Expected float32 input, got {input_details[0]['dtype']}. "
-        "Use the INT8 inference script for quantized models."
-    )
+    input_dtype = input_details[0]["dtype"]
+    is_quantized_input = input_dtype in (np.int8, np.uint8)
+    if is_quantized_input:
+        scale, zero_point = input_details[0]["quantization"]
+        qmin, qmax = np.iinfo(input_dtype).min, np.iinfo(input_dtype).max
+        input_tensor = np.clip(
+            np.round(input_tensor / scale) + zero_point,
+            qmin,
+            qmax,
+        ).astype(input_dtype)
 
     interpreter.set_tensor(input_details[0]["index"], input_tensor)
     interpreter.invoke()
 
     raw_output = interpreter.get_tensor(output_details[0]["index"])
+    output_dtype = output_details[0]["dtype"]
+    if output_dtype in (np.int8, np.uint8):
+        out_scale, out_zero_point = output_details[0]["quantization"]
+        raw_output = (raw_output.astype(np.float32) - out_zero_point) * out_scale
 
     return postprocess(raw_output, labels, top_k)
 
@@ -156,13 +169,14 @@ def run_tflite_inference(model_path:  str,
 # ──────────────────────────────────────────────────────────────────────────────
 def main():
     parser = argparse.ArgumentParser(
-        description="Single-image TFLite FP32 inference for SqueezeNet1.1.",
+        description="Single-image TFLite inference for SqueezeNet1.1 (FP32/INT8).",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
             "Examples:\n"
             "  python inference.py path/to/image.jpg\n"
             "  python inference.py path/to/image.jpg --top-k 3\n"
-            "  python inference.py path/to/image.jpg --model ../../Models/squeezenet1_1_FP32.tflite\n"
+            "  python inference.py path/to/image.jpg --model model/squeezenet1_1_FP32.tflite\n"
+            "  python inference.py path/to/image.jpg --model model/squeezenet1_1_INT8.tflite\n"
         ),
     )
     parser.add_argument(
@@ -175,7 +189,7 @@ def main():
     )
     parser.add_argument(
         "--model", default=MODEL_PATH,
-        help=f"Path to FP32 TFLite model (default: {MODEL_PATH}).",
+        help=f"Path to TFLite model (FP32/INT8, default: {MODEL_PATH}).",
     )
     parser.add_argument(
         "--labels", default=LABELS_PATH,
@@ -193,7 +207,7 @@ def main():
     # ── Check image argument first ───────────────────────────────────────────
     if image_path is None:
         print("┌─────────────────────────────────────────────────────────┐")
-        print("│             SqueezeNet1.1 — TFLite FP32 Inference       │")
+        print("│             SqueezeNet1.1 — TFLite Inference            │")
         print("├─────────────────────────────────────────────────────────┤")
         print("│  [ERROR] Missing required argument: image               │")
         print("│          Please provide a path to an input image.       │")
@@ -204,7 +218,7 @@ def main():
         print("│    image            Path to input image (JPEG/PNG)      │")
         print("│                                                         │")
         print("│  Options:                                               │")
-        print("│    --model PATH     Path to FP32 TFLite model           │")
+        print("│    --model PATH     Path to TFLite model                │")
         print("│    --labels PATH    Path to imagenet_labels.txt         │")
         print("│    --top-k N        Number of top predictions (def: 5)  │")
         print("│    -h, --help       Show full help message              │")
@@ -237,10 +251,26 @@ def main():
     labels = load_labels(args.labels)
     print(f"Loaded {len(labels)} labels from {args.labels}")
 
+    # ── Detect model type and input size for logging ────────────────────────
+    interp_tmp = tf.lite.Interpreter(model_path=args.model)
+    interp_tmp.allocate_tensors()
+    inp_details = interp_tmp.get_input_details()[0]
+    inp_dtype = inp_details["dtype"]
+    input_shape = inp_details["shape"]
+    input_h, input_w = int(input_shape[1]), int(input_shape[2])
+    del interp_tmp
+
+    if inp_dtype == np.float32:
+        model_type = "FP32"
+    elif inp_dtype in (np.int8, np.uint8):
+        model_type = "INT8"
+    else:
+        model_type = str(inp_dtype)
+
     # ── Run inference ────────────────────────────────────────────────────────
-    print(f"\nModel   : {args.model}")
+    print(f"\nModel   : {args.model}  ({model_type})")
     print(f"Image   : {image_path}")
-    print(f"Input   : ({INPUT_HEIGHT}, {INPUT_WIDTH}, 3)  ImageNet mean/std")
+    print(f"Input   : ({input_h}, {input_w}, 3)  ImageNet mean/std")
     print(f"Top-K   : {args.top_k}")
     print()
 

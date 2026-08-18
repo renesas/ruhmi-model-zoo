@@ -41,6 +41,7 @@ Usage:
   python download_model.py --mode fp32               # fp32 only
   python download_model.py --mode int8               # int8 only
   python download_model.py --mode int8 --calib-num 500
+  python download_model.py --calib-dir /path/to/Datasets  # custom dataset dir
 """
 
 import argparse
@@ -360,7 +361,7 @@ def verify_tflite(path: str, tag: str) -> None:
 # ══════════════════════════════════════════════════════════════════════════════
 # Main
 # ══════════════════════════════════════════════════════════════════════════════
-def main(mode: str = "all", calib_num: int = 0):
+def main(mode: str = "all", calib_num: int = 0, calib_dir: str = None):
     """
     Download the AD .h5 model and convert to TFLite.
 
@@ -372,6 +373,10 @@ def main(mode: str = "all", calib_num: int = 0):
         "all"  → Both FP32 + INT8 (default).
     calib_num : int
         Max calibration samples for INT8 (0 = use all available).
+    calib_dir : str, optional
+        Path to the directory containing the ToyCar dataset (i.e. the parent
+        of the ``ToyCar/`` folder). Defaults to ``Datasets/`` next to this
+        script. Auto-downloaded from Zenodo if not found.
     """
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
@@ -404,7 +409,7 @@ def main(mode: str = "all", calib_num: int = 0):
 
         # Ensure the DCASE ToyCar dataset is available
         print("  Ensuring calibration dataset (ToyCar training data)...")
-        toycar_dir = ensure_dataset(DATASET_DIR)
+        toycar_dir = ensure_dataset(calib_dir or DATASET_DIR)
         train_dir = os.path.join(toycar_dir, "train")
 
         # Build calibration feature vectors
@@ -459,5 +464,15 @@ if __name__ == "__main__":
         default=0,
         help="Max calibration files for INT8 (0 = use all). Default: 0.",
     )
+    parser.add_argument(
+        "--calib-dir",
+        type=str,
+        default=None,
+        help=(
+            f"Path to directory containing the ToyCar dataset (parent of ToyCar/). "
+            f"Defaults to Datasets/ next to this script. "
+            "Auto-downloaded from Zenodo if not found."
+        ),
+    )
     args = parser.parse_args()
-    main(args.mode, args.calib_num)
+    main(args.mode, args.calib_num, args.calib_dir)

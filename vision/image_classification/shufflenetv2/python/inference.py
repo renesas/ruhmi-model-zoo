@@ -4,7 +4,7 @@ inference.py — Single-image TFLite FP32 inference for ShuffleNetV2 x0.5.
 
 Usage:
   python inference.py <image_path>
-  python inference.py --model Model/shufflenet_v2_x0_5_FP32.tflite sample_images/coco_cat.jpg
+    python inference.py --model model/shufflenet_v2_x0_5_FP32.tflite sample_images/coco_cat.jpg
 """
 
 import os
@@ -20,7 +20,7 @@ import tensorflow as tf
 # Defaults
 # ──────────────────────────────────────────────────────────────────────────────
 BASE_DIR     = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH   = os.path.join(BASE_DIR, "Model", "shufflenet_v2_x0_5_FP32.tflite")
+MODEL_PATH   = os.path.join(BASE_DIR, "model", "shufflenet_v2_x0_5_FP32.tflite")
 LABELS_PATH  = os.path.join(BASE_DIR, "utils", "imagenet_labels.txt")
 SAMPLE_IMAGE = os.path.join(BASE_DIR, "sample_images", "coco_cat.jpg")
 

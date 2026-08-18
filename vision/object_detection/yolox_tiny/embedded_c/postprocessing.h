@@ -23,7 +23,7 @@
 
 #include <stdint.h>
 #include "preprocessing.h"          /* LetterboxParams */
-#include "../common/model_metadata.h"
+#include "model_metadata.h"
 
 /* ── Model output constants (sourced from model_metadata.h) ──────────── */
 #define NUM_ANCHORS             MODEL_NUM_ANCHORS

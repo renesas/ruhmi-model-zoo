@@ -33,7 +33,7 @@ except Exception:
 # Paths / constants
 # ──────────────────────────────────────────────────────────────────────────────
 BASE_DIR   = os.path.dirname(os.path.abspath(__file__))
-MODEL_DIR  = os.path.join(BASE_DIR, "Model")
+MODEL_DIR  = os.path.join(BASE_DIR, "model")
 ONNX_PATH  = os.path.join(MODEL_DIR, "shufflenet_v2_x0_5.onnx")
 FP32_PATH  = os.path.join(MODEL_DIR, "shufflenet_v2_x0_5_FP32.tflite")
 INT8_PATH  = os.path.join(MODEL_DIR, "shufflenet_v2_x0_5_INT8.tflite")

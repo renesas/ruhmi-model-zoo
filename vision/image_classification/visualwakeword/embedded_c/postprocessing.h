@@ -11,7 +11,7 @@
 #define POSTPROCESSING_H
 
 #include <stdint.h>
-#include "../common/model_metadata.h"
+#include "model_metadata.h"
 
 /*
  * OUTPUT_SCALE, OUTPUT_ZP and OUTPUT_HAS_SOFTMAX are defined in model_metadata.h.

@@ -10,7 +10,7 @@
 #define PREPROCESSING_H
 
 #include <stdint.h>
-#include "../common/model_metadata.h"
+#include "model_metadata.h"
 
 /**
  * @brief Resize and quantize an RGB888 image for BlazeFace inference.

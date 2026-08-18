@@ -13,7 +13,7 @@ MobileNetV1 is a lightweight depthwise-separable convolutional network ([Howard 
 | **Framework** | Keras / TensorFlow 2.x |
 | **Dataset** | ImageNet-1k (1000 classes) |
 | **Input shape** | `(1, 224, 224, 3)` — HWC, RGB |
-| **Output shape** | `(1, 1000)` — 1000 class logits |
+| **Output shape** | `(1, 1000)` — 1000 class probabilities |
 | **Source** | `tf.keras.applications.MobileNet(alpha=0.25, weights="imagenet")` |
 
 ## Model Report Card
@@ -63,17 +63,18 @@ mobilenetv1/
 
 ## Prerequisites
 
-1. **Python 3.10** installed (see [Install Python 3.10](../../../README.md#install-python-310) in the top-level README for platform-specific steps).
+1. **Python 3.10** installed.
 2. **Inference venv** — navigate to the `python/` directory and create a dedicated virtual environment:
 
     **Windows PowerShell**
+    > **Note:** If venv activation is blocked by PowerShell execution policy ("running scripts is disabled"), run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` in the same PowerShell window, then run the activation command again.
 
     ```powershell
     cd vision\image_classification\mobilenetv1\python
-    python -m venv .venv_mobilenetv1
+    py -3.10 -m venv .venv_mobilenetv1
     .\.venv_mobilenetv1\Scripts\Activate.ps1
-    pip install --upgrade pip
-    pip install -r requirements.txt
+    python -m pip install --upgrade pip
+    python -m pip install -r requirements.txt
     ```
 
     **Ubuntu / bash**
@@ -181,14 +182,14 @@ Navigate back to the **repository root** and run the compiler with `.mera_venv` 
 **Windows PowerShell**
 
 ```powershell
-cd C:\Users\<you>\ruhmi-model-zoo
+cd C:\Users\<you>\Model-zoo
 python ruhmi_tools\mcu_compile.py vision\image_classification\mobilenetv1\python\config.yaml
 ```
 
 **Ubuntu / bash**
 
 ```bash
-cd ~/ruhmi-model-zoo
+cd ~/Model-zoo
 python ruhmi_tools/mcu_compile.py vision/image_classification/mobilenetv1/python/config.yaml
 ```
 

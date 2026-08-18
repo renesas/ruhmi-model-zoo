@@ -17,7 +17,7 @@
  * DAMAGES, REGARDLESS OF WHETHER SUCH CLAIM IS BASED ON CONTRACT, TORT, STRICT LIABILITY, OR OTHERWISE.
  **********************************************************************************************************************/
 
-#include "../common/model_metadata.h"
+#include "model_metadata.h"
 #include "preprocessing.h"
 
 /***********************************************************************************************************************

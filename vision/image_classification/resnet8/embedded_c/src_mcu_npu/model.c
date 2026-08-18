@@ -50,6 +50,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 #include <stdbool.h>
 
 #include "model.h"
@@ -62,7 +63,6 @@
 // Buffers for CPU units
 float buf_serving_default_input_1_0[3072];
 int8_t buf_serving_default_input_1_0_10052[3072];
-int8_t buf_StatefulPartitionedCall_1_0_70041_10128[10];
 float buf_StatefulPartitionedCall_1_0_70041[10];
 
 // Arenas for CPU units
@@ -85,13 +85,14 @@ void RunModel(bool clean_outputs) {
   // Buffers for NPU units
   int8_t* buf_StatefulPartitionedCall_1_0_70041_10128 = (int8_t*) (sub_0001_arena + sub_0001_address_StatefulPartitionedCall_1_0_70041_10128);
 
-// CPU Unit
+  // CPU Unit
   compute_sub_0000(compute_arena_sub_0000, buf_serving_default_input_1_0, buf_serving_default_input_1_0_10052  );
 
-// NPU Unit
+  memcpy((sub_0001_arena + sub_0001_address_serving_default_input_1_0_10052), buf_serving_default_input_1_0_10052, 3072);
+  // NPU Unit
   sub_0001_invoke(clean_outputs);
 
-// CPU Unit
+  // CPU Unit
   compute_sub_0002(compute_arena_sub_0002, buf_StatefulPartitionedCall_1_0_70041_10128, buf_StatefulPartitionedCall_1_0_70041  );
 
 }

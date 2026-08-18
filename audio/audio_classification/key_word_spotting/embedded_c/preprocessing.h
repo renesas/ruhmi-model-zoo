@@ -10,7 +10,7 @@
 #define PREPROCESSING_H
 
 #include <stdint.h>
-#include "../common/model_metadata.h"
+#include "model_metadata.h"
 
 /* ========== Configuration (Synced with model_metadata.h) ========== */
 #define MFCC_SAMPLE_RATE       SAMPLE_RATE

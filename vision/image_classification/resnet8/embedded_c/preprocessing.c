@@ -7,7 +7,7 @@
  */
 
 #include "preprocessing.h"
-#include "../common/model_metadata.h"
+#include "model_metadata.h"
 
 void preprocess(const uint8_t *source_image,
                 uint16_t source_width, uint16_t source_height,

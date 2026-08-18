@@ -23,7 +23,7 @@ Download Yolo-Fastest model files and convert to TFLite FP32 / INT8.
 Pipeline
 --------
   1. Download .cfg / .weights / .names from GitHub (dog-qiuqiu/Yolo-Fastest)
-  2. Darknet → ONNX FP32  (delegates to convert_to_onnx.py in the same directory)
+    2. Darknet → ONNX FP32  (delegates to utils/convert_to_onnx.py)
   3. ONNX FP32 → TFLite FP32  (via onnx2tf, handles NCHW→NHWC automatically)
   4. ONNX FP32 → TFLite INT8  (via onnx2tf with representative dataset,
                                 full-integer quantization calibrated on COCO val2017)
@@ -46,6 +46,7 @@ Usage
     python download_model.py --mode fp32          # FP32 TFLite only
     python download_model.py --mode int8          # FP32 TFLite + INT8 TFLite
     python download_model.py --mode all           # same as int8 (default)
+    python download_model.py --calib-dir /path/to/val2017
     python download_model.py --skip-convert       # Darknet files only, no conversion
     python download_model.py --force              # re-download / re-convert even if files exist
     python download_model.py --calib-num 200      # number of calibration images (default 100)
@@ -162,12 +163,12 @@ def download_file(url: str, dst: Path, force: bool = False) -> None:
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# 2. ONNX FP32  (delegate to convert_to_onnx.py in the same directory)
+# 2. ONNX FP32  (delegate to utils/convert_to_onnx.py)
 # ──────────────────────────────────────────────────────────────────────────────
 def ensure_onnx_fp32(force: bool = False) -> None:
     """Produce the FP32 ONNX model if not already present.
 
-    Delegates to ``convert_to_onnx.py`` which reads the Darknet files from
+    Delegates to ``utils/convert_to_onnx.py`` which reads the Darknet files from
     ``model/`` and writes ``model/yolo_fastest_1.1.onnx``.
 
     Parameters
@@ -189,7 +190,7 @@ def ensure_onnx_fp32(force: bool = False) -> None:
     )
     cfg     = HERE / "model" / vcfg["cfg"]
     weights = HERE / "model" / vcfg["weights"]
-    convert = HERE / "convert_to_onnx.py"
+    convert = HERE / "utils" / "convert_to_onnx.py"
 
     if not cfg.exists() or not weights.exists():
         raise FileNotFoundError(
@@ -291,15 +292,25 @@ def convert_tflite_fp32(force: bool = False) -> None:
 # ──────────────────────────────────────────────────────────────────────────────
 # 4. TFLite INT8  (ONNX FP32 → TFLite INT8 via onnx2tf + representative dataset)
 # ──────────────────────────────────────────────────────────────────────────────
-def _resolve_calib_dir() -> Path:
+def _resolve_calib_dir(calib_dir: Path) -> Path:
     """Return a directory containing COCO val2017 images.
 
     All data must live inside this model's root directory (``Datasets/val2017``).
-    If not present, download automatically from cocodataset.org.
-    Never falls back to shared paths outside the model root.
+    If the user provides a custom calib dir, use it directly when valid.
+    If default path is used and missing, download automatically from cocodataset.org.
     """
-    if CALIB_DIR.is_dir() and any(CALIB_DIR.glob("*.jpg")):
-        return CALIB_DIR
+    calib_dir = Path(calib_dir)
+
+    if calib_dir.is_dir() and any(calib_dir.glob("*.jpg")):
+        return calib_dir
+
+    # For user-provided custom paths, fail clearly instead of downloading elsewhere.
+    if calib_dir.resolve() != CALIB_DIR.resolve():
+        raise FileNotFoundError(
+            f"Calibration directory not found or empty: {calib_dir}\n"
+            "Please provide a valid directory containing COCO val2017 images."
+        )
+
     # Auto-download into model root
     print("  COCO val2017 not found locally — downloading (~780 MB) …")
     import zipfile
@@ -313,7 +324,7 @@ def _resolve_calib_dir() -> Path:
     with zipfile.ZipFile(zip_path, "r") as zf:
         zf.extractall(DATASETS_DIR)
     zip_path.unlink()
-    return CALIB_DIR
+    return calib_dir
 
 
 def _list_images(folder: Path, need: int) -> list:
@@ -328,7 +339,8 @@ def _list_images(folder: Path, need: int) -> list:
     return imgs
 
 
-def convert_tflite_int8(calib_num: int = DEFAULT_CALIB_NUM,
+def convert_tflite_int8(calib_dir: Path,
+                        calib_num: int = DEFAULT_CALIB_NUM,
                         force: bool = False) -> None:
     """Quantize the FP32 ONNX model to a full-integer INT8 TFLite model.
 
@@ -373,7 +385,7 @@ def convert_tflite_int8(calib_num: int = DEFAULT_CALIB_NUM,
                     np.random.RandomState(0).rand(20, 128, 128, 3).astype(np.float32))
 
         # ── Calibration images ────────────────────────────────────────────────
-        calib_dir   = _resolve_calib_dir()
+        calib_dir   = _resolve_calib_dir(calib_dir)
         calib_paths = _list_images(calib_dir, need=calib_num)
         if len(calib_paths) < 10:
             raise FileNotFoundError(
@@ -502,6 +514,13 @@ def main():
         "--calib-num", type=int, default=DEFAULT_CALIB_NUM,
         help=f"Number of calibration images for INT8 (default: {DEFAULT_CALIB_NUM}).",
     )
+    parser.add_argument(
+        "--calib-dir", type=str, default=str(CALIB_DIR),
+        help=(
+            f"Path to calibration images directory (default: {CALIB_DIR}). "
+            "If default path is missing, COCO val2017 will be auto-downloaded."
+        ),
+    )
     args = parser.parse_args()
 
     # Resolve variant paths into module-level globals used by helper functions
@@ -549,7 +568,11 @@ def main():
         print("\n" + "─" * 60)
         print("  Step 2b/2: ONNX FP32 → TFLite INT8  (onnx2tf + representative dataset)")
         print("─" * 60)
-        convert_tflite_int8(calib_num=args.calib_num, force=args.force)
+        convert_tflite_int8(
+            calib_dir=Path(args.calib_dir),
+            calib_num=args.calib_num,
+            force=args.force,
+        )
 
     # ── Summary ───────────────────────────────────────────────────────────────
     print("\n" + "═" * 60)

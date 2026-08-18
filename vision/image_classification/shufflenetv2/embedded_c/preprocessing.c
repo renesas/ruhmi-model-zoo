@@ -15,7 +15,7 @@
  */
 
 #include "preprocessing.h"
-#include "../common/model_metadata.h"
+#include "model_metadata.h"
 #include <stddef.h>
 
 /* ── Per-channel normalization constants ──────────────────────────────── */

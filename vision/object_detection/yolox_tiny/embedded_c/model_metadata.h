@@ -121,7 +121,7 @@ extern "C" {
  * ══════════════════════════════════════════════════════════════════════ */
 
 /** Minimum score (objectness × class_conf) to keep a detection. */
-#define POSTPROC_SCORE_THRESH   (0.25f)
+#define POSTPROC_SCORE_THRESH   (0.3f)
 
 /** IoU threshold for per-class Non-Maximum Suppression. */
 #define POSTPROC_NMS_THRESH     (0.45f)

@@ -28,7 +28,7 @@ Accuracy measured on the CIFAR-10 test set (10 000 images).
 | MERA Quantised INT8 | `.mera` | 88.64 |
 
 > [!NOTE]
-> The model was compiled using `mera-2.5.0+pkg.3577` and `FSP 6.2` was used for building and testing the project.
+> The model was compiled using `mera-2.6.0+pkg.4815` and `FSP 6.2` was used for building and testing the project.
 
 ### Inference Performance (RA8P1)
 
@@ -54,17 +54,18 @@ resnet8/
 
 ## Prerequisites
 
-1. **Python 3.10** installed (see [Install Python 3.10](../../../README.md#install-python-310) in the top-level README for platform-specific steps).
+1. **Python 3.10** installed.
 2. **Inference venv** — navigate to the `python/` directory and create a dedicated virtual environment:
 
     **Windows PowerShell**
+    > **Note:** If venv activation is blocked by PowerShell execution policy ("running scripts is disabled"), run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` in the same PowerShell window, then run the activation command again.
 
     ```powershell
     cd vision\image_classification\resnet\python
-    python -m venv .venv_resnet
+    py -3.10 -m venv .venv_resnet
     .\.venv_resnet\Scripts\Activate.ps1
-    pip install --upgrade pip
-    pip install -r requirements.txt
+    python -m pip install --upgrade pip
+    python -m pip install -r requirements.txt
     ```
 
     **Ubuntu / bash**
@@ -148,12 +149,15 @@ python inference.py sample_images/0000_cat_domestic_cat_s_000907.png
 **Example output:**
 
 ```
-========================================
-Image              : cat.png
-Predicted class ID : 3
-Predicted label    : cat
-Confidence (score) : 0.9142
-========================================
+============================================================
+Rank  Class   Label               Score
+------------------------------------------------------------
+1     3       cat                 0.999985
+2     5       dog                 0.000008
+3     6       frog                0.000005
+4     2       bird                0.000002
+5     0       airplane            0.000000
+============================================================
 ```
 
 > [!NOTE]
@@ -191,14 +195,14 @@ Navigate back to the **repository root** and run the compiler with `.mera_venv` 
 **Windows PowerShell**
 
 ```powershell
-cd C:\Users\<you>\ruhmi-model-zoo
+cd C:\Users\<you>\Model-zoo
 python ruhmi_tools\mcu_compile.py vision\image_classification\resnet\python\config.yaml
 ```
 
 **Ubuntu / bash**
 
 ```bash
-cd ~/ruhmi-model-zoo
+cd ~/Model-zoo
 python ruhmi_tools/mcu_compile.py vision/image_classification/resnet8/python/config.yaml
 ```
 

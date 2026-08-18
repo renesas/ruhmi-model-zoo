@@ -50,6 +50,11 @@ import wave
 
 import numpy as np
 
+# TensorFlow's TFLite fallback conversion path can attempt to initialize GPU
+# support even when the model is converted on CPU. Disabling CUDA here avoids
+# noisy runtime failures in environments without working CUDA libraries.
+os.environ.setdefault("CUDA_VISIBLE_DEVICES", "-1")
+
 try:
     import tensorflow as tf
 except Exception:
@@ -86,8 +91,8 @@ SAVED_MODEL_FILES = {
     "variables/variables.index":               f"{_BASE_RAW}/variables/variables.index",
 }
 
-# Calibration directory — validation WAV files (same pattern as other models)
-CALIB_DIR = os.path.join("Datasets", "speech_commands_val")
+# Calibration directory — validation WAV files
+CALIB_DIR = os.path.join(HERE, "Datasets", "speech_commands_val")
 
 # 12-class keyword labels – order must match the training label map
 # (Google Speech Commands v0.02 via tensorflow_datasets)
@@ -309,6 +314,8 @@ def ensure_dataset(calib_dir: str) -> str:
       2. Speech Commands tfrecords exist   → extract WAVs.
       3. Nothing exists                    → download via tfds, then extract.
     """
+    calib_dir = os.path.abspath(calib_dir)
+
     # 1. Dataset already present
     if os.path.isdir(calib_dir) and list_wavs(calib_dir, need=1):
         n_wavs = len(list_wavs(calib_dir, need=99999))

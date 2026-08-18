@@ -18,7 +18,7 @@
 #define PREPROCESSING_H
 
 #include <stdint.h>
-#include "../common/model_metadata.h"
+#include "model_metadata.h"
 
 /**
  * Bilinear resize a uint8 RGB source image to [MODEL_INPUT_W x MODEL_INPUT_H x MODEL_INPUT_C],

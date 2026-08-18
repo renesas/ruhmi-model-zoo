@@ -1,7 +1,7 @@
 # =============================================================================
 # MCU Compile Configuration — Visual Wake Words (VWW, vww_96_INT8)
 # Usage (from repo root):
-#   python ruhmi_tools/compile.py vision/image_classification/visualwakeword/python/config.yaml
+#   python ruhmi_tools/mcu_compile.py vision/image_classification/visualwakeword/python/config.yaml
 # =============================================================================
 
 # ---------------------------------------------------------------------------

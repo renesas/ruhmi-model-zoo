@@ -18,39 +18,38 @@
 #   https://github.com/Megvii-BaseDetection/YOLOX
 # Licensed under the Apache License, Version 2.0.
 """
-YOLOX-Tiny ONNX / TFLite Inference
-====================================
-Run object detection on a single image using the YOLOX-Tiny model.
-Supports both ONNX (.onnx) and TFLite (.tflite) model formats.
+YOLOX-Tiny TFLite Inference
+===========================
+Run object detection on a single image using the YOLOX-Tiny TFLite model.
 
-The model input size is auto-detected from the model file (default 416x416).
+The model input size is auto-detected from the TFLite file.
 Preprocessing uses letterbox resize with gray (114) padding and 0-255 float
 range (YOLOX convention -- no /255 normalization).
 
 Usage:
     python inference.py --image sample.jpg
-    python inference.py --image sample.jpg --model model/yolox_tiny.onnx
-    python inference.py --image sample.jpg --model model/yolox_tiny_FP32.tflite
-    python inference.py --image sample.jpg --model model/yolox_tiny_INT8.tflite
+    python inference.py --image sample.jpg --model model/yolox_tiny_224_FP32.tflite
+    python inference.py --image sample.jpg --model model/yolox_tiny_224_INT8.tflite
     python inference.py --image sample.jpg --score 0.25 --nms 0.5
     python inference.py --image sample.jpg --output result.jpg --verbose
 """
 
 import argparse
 import os
+import sys
 import time
-from pathlib import Path
+from typing import Tuple
 
 import cv2
 import numpy as np
-import onnxruntime as ort
+import tensorflow as tf
 
 # ──────────────────────────────────────────────────────────────
 # Configuration
 # ──────────────────────────────────────────────────────────────
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-MODEL_PATH   = BASE_DIR / "model" / "yolox_tiny.onnx"
+MODEL_PATH   = os.path.join(BASE_DIR, "model", "yolox_tiny_224_FP32.tflite")
 PAD_VALUE    = 114
 STRIDES      = (8, 16, 32)
 
@@ -209,39 +208,25 @@ def draw_results(image, results, class_names):
 # Inference
 # ──────────────────────────────────────────────────────────────
 def load_model(model_path):
-    """Load ONNX or TFLite model. Returns (session_or_interpreter, input_name, input_h, input_w, model_type).
+    """Load a TFLite model and return interpreter plus I/O metadata."""
+    interpreter = tf.lite.Interpreter(model_path=str(model_path))
+    interpreter.allocate_tensors()
 
-    model_type is 'onnx' or 'tflite'.
-    """
-    model_path = str(model_path)
-    if model_path.endswith(".tflite"):
-        try:
-            import tflite_runtime.interpreter as tflite
-        except ImportError:
-            import tensorflow.lite as tflite
+    input_details = interpreter.get_input_details()[0]
+    output_details = interpreter.get_output_details()[0]
+    input_shape = input_details["shape"]
 
-        interpreter = tflite.Interpreter(model_path=model_path)
-        interpreter.allocate_tensors()
-        inp = interpreter.get_input_details()[0]
-        input_shape = inp["shape"]
-        # NHWC: (1, H, W, 3)
-        if len(input_shape) == 4 and input_shape[3] == 3:
-            input_h, input_w = int(input_shape[1]), int(input_shape[2])
-        else:
-            input_h, input_w = int(input_shape[2]), int(input_shape[3])
-        return interpreter, None, input_h, input_w, "tflite"
+    if len(input_shape) == 4 and int(input_shape[3]) == 3:
+        input_h, input_w = int(input_shape[1]), int(input_shape[2])
     else:
-        providers = ["CUDAExecutionProvider", "CPUExecutionProvider"]
-        session = ort.InferenceSession(model_path, providers=providers)
-        inp = session.get_inputs()[0]
-        input_h, input_w = int(inp.shape[2]), int(inp.shape[3])
-        return session, inp.name, input_h, input_w, "onnx"
+        input_h, input_w = int(input_shape[2]), int(input_shape[3])
+
+    return interpreter, input_details, output_details, input_h, input_w
 
 
-def run_inference(session, input_name, input_h, input_w, image_path,
-                  score_thresh=0.3, nms_thresh=0.45, verbose=False,
-                  model_type="onnx"):
-    """Run detection on a single image. Supports ONNX and TFLite models."""
+def run_inference(interpreter, input_details, output_details, input_h, input_w, image_path,
+                  score_thresh=0.3, nms_thresh=0.45, verbose=False):
+    """Run detection on a single image with a TFLite model."""
     img = cv2.imread(str(image_path))
     if img is None:
         raise FileNotFoundError("Cannot read image: {}".format(image_path))
@@ -250,64 +235,49 @@ def run_inference(session, input_name, input_h, input_w, image_path,
 
     t0 = time.perf_counter()
 
-    if model_type == "tflite":
-        interpreter = session
-        input_details = interpreter.get_input_details()[0]
-        output_details = interpreter.get_output_details()[0]
-        input_dtype = input_details["dtype"]
+    input_dtype = input_details["dtype"]
 
-        # NHWC blob
-        blob_fp32 = padded.astype(np.float32)  # HWC, 0-255
+    # NHWC blob
+    blob_fp32 = padded.astype(np.float32)  # HWC, 0-255
 
-        if input_dtype == np.int8:
-            input_quant = input_details.get("quantization_parameters", {})
-            input_scale = input_quant.get("scales", np.array([1.0]))[0]
-            input_zp = input_quant.get("zero_points", np.array([0]))[0]
-            blob_input = np.clip(
-                np.round(blob_fp32 / input_scale + input_zp), -128, 127
-            ).astype(np.int8)
-        elif input_dtype == np.uint8:
-            input_quant = input_details.get("quantization_parameters", {})
-            input_scale = input_quant.get("scales", np.array([1.0]))[0]
-            input_zp = input_quant.get("zero_points", np.array([0]))[0]
-            blob_input = np.clip(
-                np.round(blob_fp32 / input_scale + input_zp), 0, 255
-            ).astype(np.uint8)
-        else:
-            blob_input = blob_fp32
-
-        blob_input = blob_input[np.newaxis, ...]  # (1, H, W, 3)
-
-        if verbose:
-            print("  Input shape : {}".format(blob_input.shape))
-            print("  Input dtype : {}".format(blob_input.dtype))
-            print("  Scale       : {:.4f}".format(scale))
-            print("  Padding     : {}".format(pad))
-
-        interpreter.set_tensor(input_details["index"], blob_input)
-        interpreter.invoke()
-        raw = interpreter.get_tensor(output_details["index"])
-
-        # Dequantize output if needed
-        if raw.dtype != np.float32:
-            output_quant = output_details.get("quantization_parameters", {})
-            output_scale = output_quant.get("scales", np.array([1.0]))[0]
-            output_zp = output_quant.get("zero_points", np.array([0]))[0]
-            raw = (raw.astype(np.float32) - output_zp) * output_scale
-
-        if raw.ndim == 2:
-            raw = raw[np.newaxis, ...]
-
+    if input_dtype == np.int8:
+        input_quant = input_details.get("quantization_parameters", {})
+        input_scale = input_quant.get("scales", np.array([1.0]))[0]
+        input_zp = input_quant.get("zero_points", np.array([0]))[0]
+        blob_input = np.clip(
+            np.round(blob_fp32 / input_scale + input_zp), -128, 127
+        ).astype(np.int8)
+    elif input_dtype == np.uint8:
+        input_quant = input_details.get("quantization_parameters", {})
+        input_scale = input_quant.get("scales", np.array([1.0]))[0]
+        input_zp = input_quant.get("zero_points", np.array([0]))[0]
+        blob_input = np.clip(
+            np.round(blob_fp32 / input_scale + input_zp), 0, 255
+        ).astype(np.uint8)
     else:
-        # ONNX path
-        blob = padded.astype(np.float32).transpose(2, 0, 1)[np.newaxis, ...]
+        blob_input = blob_fp32
 
-        if verbose:
-            print("  Input shape : {}".format(blob.shape))
-            print("  Scale       : {:.4f}".format(scale))
-            print("  Padding     : {}".format(pad))
+    blob_input = blob_input[np.newaxis, ...]  # (1, H, W, 3)
 
-        raw = session.run(None, {input_name: blob})[0]
+    if verbose:
+        print("  Input shape : {}".format(blob_input.shape))
+        print("  Input dtype : {}".format(blob_input.dtype))
+        print("  Scale       : {:.4f}".format(scale))
+        print("  Padding     : {}".format(pad))
+
+    interpreter.set_tensor(input_details["index"], blob_input)
+    interpreter.invoke()
+    raw = interpreter.get_tensor(output_details["index"])
+
+    # Dequantize output if needed
+    if raw.dtype != np.float32:
+        output_quant = output_details.get("quantization_parameters", {})
+        output_scale = output_quant.get("scales", np.array([1.0]))[0]
+        output_zp = output_quant.get("zero_points", np.array([0]))[0]
+        raw = (raw.astype(np.float32) - output_zp) * output_scale
+
+    if raw.ndim == 2:
+        raw = raw[np.newaxis, ...]
 
     latency_ms = (time.perf_counter() - t0) * 1000
 
@@ -323,11 +293,11 @@ def run_inference(session, input_name, input_h, input_w, image_path,
 # ──────────────────────────────────────────────────────────────
 def main():
     ap = argparse.ArgumentParser(
-        description="YOLOX-Tiny ONNX Inference -- single image object detection"
+        description="YOLOX-Tiny TFLite Inference -- single image object detection"
     )
     ap.add_argument(
         "-m", "--model", default=str(MODEL_PATH),
-        help="Path to ONNX model (default: model/yolox_tiny.onnx).",
+        help="Path to TFLite model (default: model/yolox_tiny_224_FP32.tflite).",
     )
     ap.add_argument(
         "-i", "--image", required=True,
@@ -355,23 +325,21 @@ def main():
     )
     args = ap.parse_args()
 
-    session, input_name, input_h, input_w, model_type = load_model(args.model)
+    interpreter, input_details, output_details, input_h, input_w = load_model(args.model)
+    input_dtype = input_details["dtype"]
+    output_dtype = output_details["dtype"]
+    model_type = "FP32" if input_dtype == np.float32 and output_dtype == np.float32 else "INT8"
     print("Model   : {}".format(args.model))
     print("Type    : {}".format(model_type.upper()))
     print("Input   : {} x {} (auto-detected)".format(input_w, input_h))
 
     if args.verbose:
-        if model_type == "onnx":
-            out = session.get_outputs()[0]
-            print("Output  : name={}, shape={}, dtype={}".format(out.name, out.shape, out.type))
-        else:
-            out_details = session.get_output_details()[0]
-            print("Output  : shape={}, dtype={}".format(
-                list(out_details["shape"]), out_details["dtype"].__name__))
+        print("Input  : shape={}, dtype={}".format(list(input_details["shape"]), input_dtype.__name__))
+        print("Output : shape={}, dtype={}".format(list(output_details["shape"]), output_dtype.__name__))
 
     results, img, latency_ms = run_inference(
-        session, input_name, input_h, input_w,
-        args.image, args.score, args.nms, args.verbose, model_type,
+        interpreter, input_details, output_details, input_h, input_w,
+        args.image, args.score, args.nms, args.verbose,
     )
 
     print("Latency : {:.1f} ms".format(latency_ms))
@@ -394,12 +362,14 @@ def main():
     vis = draw_results(img.copy(), results, COCO_CLASSES)
 
     if args.output:
-        out_path = Path(args.output)
-        if out_path.is_dir() or not out_path.suffix:
-            out_path.mkdir(parents=True, exist_ok=True)
-            out_path = out_path / "{}_result.jpg".format(Path(args.image).stem)
+        out_path = args.output
+        if os.path.isdir(out_path) or not os.path.splitext(out_path)[1]:
+            os.makedirs(out_path, exist_ok=True)
+            out_path = os.path.join(out_path, "{}_result.jpg".format(os.path.splitext(os.path.basename(args.image))[0]))
         else:
-            out_path.parent.mkdir(parents=True, exist_ok=True)
+            parent_dir = os.path.dirname(out_path)
+            if parent_dir:
+                os.makedirs(parent_dir, exist_ok=True)
         cv2.imwrite(str(out_path), vis)
         print("Saved   : {}".format(out_path))
 
@@ -409,9 +379,9 @@ def main():
         cv2.waitKey(0)
         cv2.destroyAllWindows()
     else:
-        output_dir = BASE_DIR / "output"
-        output_dir.mkdir(parents=True, exist_ok=True)
-        default_out = output_dir / "{}_result.jpg".format(Path(args.image).stem)
+        output_dir = os.path.join(BASE_DIR, "output")
+        os.makedirs(output_dir, exist_ok=True)
+        default_out = os.path.join(output_dir, "{}_result.jpg".format(os.path.splitext(os.path.basename(args.image))[0]))
         cv2.imwrite(str(default_out), vis)
         print("Saved   : {}".format(default_out))
 

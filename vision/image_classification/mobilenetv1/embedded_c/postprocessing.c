@@ -14,7 +14,7 @@
  */
 
 #include "postprocessing.h"
-#include "../common/model_metadata.h"
+#include "model_metadata.h"
 
 /**
  * @brief Dequantize INT8 output tensor into floating-point class scores.

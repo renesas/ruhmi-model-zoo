@@ -48,23 +48,26 @@ blazeface/
 ├── README.md                   ← This file
 ├── python                      ← Inference scripts, conversion tools, config
 └── embedded_c                  ← Compiled C-code for MCU (CPU & NPU)
+    └── anchors/
+        └── anchors.h
 ```
 
 ---
 
 ## Prerequisites
 
-1. **Python 3.10** installed (see [Install Python 3.10](../../../README.md#install-python-310) in the top-level README for platform-specific steps).
+1. **Python 3.10** installed.
 2. **Inference venv** — navigate to the `python/` directory and create a dedicated virtual environment:
 
     **Windows PowerShell**
+    > **Note:** If venv activation is blocked by PowerShell execution policy ("running scripts is disabled"), run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` in the same PowerShell window, then run the activation command again.
 
     ```powershell
     cd vision\face_detection\blazeface\python
-    python -m venv .venv_blazeface
+    py -3.10 -m venv .venv_blazeface
     .\.venv_blazeface\Scripts\Activate.ps1
-    pip install --upgrade pip
-    pip install -r requirements.txt
+    python -m pip install --upgrade pip
+    python -m pip install -r requirements.txt
     ```
 
     **Ubuntu / bash**
@@ -92,9 +95,9 @@ To regenerate them from the PINTO model zoo source, use `download_model.py`:
 ```bash
 cd vision/face_detection/blazeface/python
 source .venv_blazeface/bin/activate
-python download_model.py                   # FP32 + INT8
-python download_model.py --mode fp32       # FP32 only
-python download_model.py --mode int8       # INT8 only (requires WIDER FACE val images for calibration)
+python download_model.py --mode fp32
+python download_model.py --calib-dir /path/to/WIDER_val/images
+python download_model.py --mode int8 --calib-dir /path/to/WIDER_val/images
 ```
 
 **Windows PowerShell**
@@ -102,10 +105,13 @@ python download_model.py --mode int8       # INT8 only (requires WIDER FACE val 
 ```powershell
 cd vision\face_detection\blazeface\python
 .\.venv_blazeface\Scripts\Activate.ps1
-python download_model.py
+python download_model.py --mode fp32
+python download_model.py --calib-dir C:\path\to\WIDER_val\images
 ```
 
 The script downloads the PINTO SavedModel archive, converts to TFLite (FP32 + INT8), and saves the 896 front-face anchors to `model/anchors.npy`.
+
+INT8 conversion requires user-supplied calibration images because WIDER FACE is non-commercial research use only and is not redistributed by this repository. Pass `--calib-dir` with a directory containing face images (for example WIDER FACE validation images). If you only need FP32, run `--mode fp32` and no calibration directory is required.
 
 ---
 
@@ -142,13 +148,12 @@ Optional flags:
 **Example output:**
 
 ```
-Model   : model/blazeface_front_int8.tflite
-Image   : face.jpg (640×480)
-Thresh  : 0.50  NMS IoU: 0.30
-
-Detected 2 face(s):
-  #1  score=0.94  box=[102, 45, 245, 210]  keypoints: 6
-  #2  score=0.87  box=[350, 60, 480, 230]  keypoints: 6
+[INFO] Model  : vision/face_detection/blazeface/python/model/blazeface_front_fp32.tflite
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+[INFO] Type   : FP32
+[INFO] Image  : sample_images/000000001296.jpg  (427×640)
+[INFO] Faces  : 1  |  latency: 1.06 ms
+[INFO] Display disabled, saved annotated image as vision/face_detection/blazeface/python/output/output.jpg
 ```
 
 > By default `inference.py` loads `model/blazeface_front_fp32.tflite`. Pass `--model model/blazeface_front_int8.tflite` to use the INT8 variant.
@@ -183,14 +188,14 @@ Navigate to the **repository root** and run the compiler with `.mera_venv` activ
 **Ubuntu / bash**
 
 ```bash
-cd ~/ruhmi-model-zoo
+cd ~/Model-zoo
 python ruhmi_tools/mcu_compile.py vision/face_detection/blazeface/python/config.yaml
 ```
 
 **Windows PowerShell**
 
 ```powershell
-cd C:\Users\<you>\ruhmi-model-zoo
+cd C:\Users\<you>\Model-zoo
 python ruhmi_tools\mcu_compile.py vision\face_detection\blazeface\python\config.yaml
 ```
 
@@ -205,6 +210,7 @@ The `embedded_c/` folder contains portable, board-independent files you can drop
 | File | Purpose |
 |------|---------|
 | `model_metadata.h` | All compile-time constants — input/output shape, quantization parameters, anchor layout, post-processing thresholds |
+| `anchors/anchors.h` | Generated BlazeFace anchor constants (`g_anchors[896][4]`) used by postprocessing |
 | `preprocessing.h` / `preprocessing.c` | Resize and quantize input image |
 | `postprocessing.h` / `postprocessing.c` | Dequantize, decode anchors, weighted NMS |
 
@@ -219,6 +225,8 @@ Copy the following files into your firmware project (or add them as include path
 
 ```
 embedded_c/
+├── anchors/
+│   └── anchors.h
 ├── model_metadata.h
 ├── preprocessing.h
 ├── preprocessing.c
@@ -311,14 +319,14 @@ int8_t scores_s16[ANCHORS_S16];         /* (384,)  */
 int8_t boxes_s8[ANCHORS_S8 * 16];      /* (512, 16) */
 int8_t boxes_s16[ANCHORS_S16 * 16];    /* (384, 16) */
 
-/* Anchor array (896×4) — load from anchors.npy or embed as const */
-extern const float anchors[896][4];
+/* Anchor array (896×4) generated into embedded_c/anchors/anchors.h */
+extern const float g_anchors[896][4];
 
 /* Detection output */
 BfDetections results;
 
 postprocess(scores_s8, scores_s16, boxes_s8, boxes_s16,
-            anchors, POSTPROC_SCORE_THRESH, POSTPROC_NMS_THRESH,
+            g_anchors, POSTPROC_SCORE_THRESH, POSTPROC_NMS_THRESH,
             &results);
 
 for (int i = 0; i < results.n; i++)
@@ -330,6 +338,8 @@ for (int i = 0; i < results.n; i++)
 
 > [!TIP]
 > `postprocess()` handles dequantization (each tensor has its own scale/zp), sigmoid activation, anchor decoding, and weighted NMS internally. Output coordinates are normalised to [0, 1] — multiply by image dimensions to get pixel values.
+>
+> The anchor values come from `embedded_c/anchors/anchors.h`; keep that generated header in sync with the model artifacts if you regenerate the model.
 
 ---
 

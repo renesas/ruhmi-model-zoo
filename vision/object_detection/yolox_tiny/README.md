@@ -54,17 +54,18 @@ yolox_tiny/
 
 ## Prerequisites
 
-1. **Python 3.10** installed (see [Install Python 3.10](../../../README.md#install-python-310) in the top-level README for platform-specific steps).
+1. **Python 3.10** installed.
 2. **Inference venv** — navigate to the `python/` directory and create a dedicated virtual environment:
 
     **Windows PowerShell**
+    > **Note:** If venv activation is blocked by PowerShell execution policy ("running scripts is disabled"), run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` in the same PowerShell window, then run the activation command again.
 
     ```powershell
     cd vision\object_detection\yolox_tiny\python
-    python -m venv .venv_yolox
+    py -3.10 -m venv .venv_yolox
     .\.venv_yolox\Scripts\Activate.ps1
-    pip install --upgrade pip
-    pip install -r requirements.txt
+    python -m pip install --upgrade pip
+    python -m pip install -r requirements.txt
     ```
 
     **Ubuntu / bash**
@@ -77,80 +78,86 @@ yolox_tiny/
     pip install -r requirements.txt
     ```
 
-3. **Compiler venv** (`.mera_venv`) — required only for [Step 3](#step-3--compile-for-ra8p1-ruhmi). See the [top-level README](../../../README.md) for setup instructions.
+3. **Compiler venv** (`.mera_venv`) — required only for [Step 4](#step-4--compile-for-ra8p1-ruhmi). See the [top-level README](../../../README.md) for setup instructions.
 
 ---
 
 ## Step 1 — Obtain the Model
 
-The ONNX and TFLite models (FP32 + INT8) for YOLOX-Tiny 224×224 are **already included in the repository** under `python/model/`.
-
-To regenerate them from the original PyTorch checkpoint, use `download_model.py`. Make sure the **inference venv** (`.venv_yolox`) is active and you are in the `python/` directory:
-
-**Windows PowerShell**
-
-```powershell
-python download_model.py
-```
-
-**Ubuntu / bash**
-
-```bash
-python download_model.py
-```
-
-This will download the pretrained `.pth` from the [Megvii YOLOX GitHub releases](https://github.com/Megvii-BaseDetection/YOLOX/releases), export to ONNX, and convert to TFLite (FP32 + INT8). INT8 conversion requires COCO val2017 calibration images — see the script for details.
+The TFLite models are already provided in `python/model/`. To regenerate them from scratch, proceed to [Step 2](#step-2--convert-to-tflite).
 
 ---
 
-## Step 2 — Run Inference (Python)
+## Step 2 — Convert to TFLite
 
-Run single-image inference using the ONNX or TFLite model. Make sure the **inference venv** (`.venv_yolox`) is active and you are in the `python/` directory:
+Use `download_model.py` to download the PyTorch checkpoint and convert to TFLite. Activate the **inference venv** and navigate to `python/`.
+
+**Both FP32 + INT8 (default)**
+
+```bash
+python download_model.py
+```
+
+The script will automatically download the PyTorch `.pth` from [Megvii YOLOX GitHub releases](https://github.com/Megvii-BaseDetection/YOLOX/), convert to ONNX, then to TFLite FP32 and INT8 (calibrated on COCO val2017, auto-downloaded). Use `--mode fp32` to skip INT8 or `--mode int8` for INT8 only. Output files are written to `python/model/`.
+
+---
+
+## Step 3 — Run Inference (Python)
+
+Activate the **inference venv** and navigate to `python/`:
 
 **Windows PowerShell**
 
 ```powershell
-python inference.py --image sample_images/000000000139.jpg
+cd vision\object_detection\yolox_tiny\python
+.\.venv_yolox\Scripts\Activate.ps1
+python inference.py --image sample_images\000000000139.jpg
 ```
 
 **Ubuntu / bash**
 
 ```bash
+cd vision/object_detection/yolox_tiny/python
+source .venv_yolox/bin/activate
 python inference.py --image sample_images/000000000139.jpg
 ```
-
-`<image_path>` can be any `.png` / `.jpg` image file (will be letterbox-resized to 224×224 automatically).
 
 Optional flags:
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--model` | `model/yolox_tiny.onnx` | Path to ONNX or TFLite model |
+| `--model` | `model/yolox_tiny_224_FP32.tflite` | Path to TFLite model |
 | `--score` | `0.3` | Confidence threshold |
 | `--nms` | `0.45` | NMS IoU threshold |
-| `--output` | `output/` | Save annotated image to a specific path |
-| `--display` | off | Open a window to view the annotated result |
+| `--output` | `output/` | Output directory or file path |
+| `--display` | off | Open a display window |
 | `--verbose` | off | Print per-detection table and model I/O details |
 
 **Example output:**
 
 ```
-Detected: 3 object(s)
-  person        score=0.87  box=[45,  12, 198, 210]
-  bicycle       score=0.73  box=[102, 85, 180, 190]
-  car           score=0.61  box=[0,   40, 100, 165]
+Model   : vision/object_detection/yolox_tiny/python/model/yolox_tiny_224_FP32.tflite
+Type    : FP32
+Input   : 224 x 224 (auto-detected)
+Latency : 15.3 ms
+Detected: 5 object(s)
+  -> person           score=0.302  box=[422,155,475,296]
+  -> chair            score=0.645  box=[292,219,359,322]
+  -> chair            score=0.591  box=[372,207,444,322]
+  -> tv               score=0.904  box=[3,165,157,266]
+  -> vase             score=0.598  box=[549,305,585,400]
 ```
 
 > [!NOTE]
-> By default `inference.py` loads the ONNX model from `model/`. To use a different model variant, pass the `--model` flag.
+> By default `inference.py` loads `model/yolox_tiny_224_FP32.tflite`. To use a different model variant, pass the `--model` flag.
 
 ---
 
-## Step 3 — Compile for RA8P1 (RUHMI)
+## Step 4 — Compile for RA8P1 (RUHMI)
 
 This step converts the TFLite model into C-code that runs on the RA8P1 MCU. Activate the **compiler venv** (`.mera_venv`).
 
-### 3.1 — Edit the compile configuration
+### 4.1 — Edit the compile configuration
 
 Open `python/config.yaml` and set the `model_path` and `output_dir` to **absolute paths** on your system:
 
@@ -167,21 +174,21 @@ quantize: false    # model is already INT8
 > [!TIP]
 > For NPU deployment, set `target: npu` and change `output_dir` to point to `embedded_c/src_mcu_npu`. For FP32 models with MERA quantization, set `quantize: true` and provide a `calib_data` path.
 
-### 3.2 — Run the compiler
+### 4.2 — Run the compiler
 
 Navigate to the **repository root** and run the compiler with `.mera_venv` active:
 
 **Windows PowerShell**
 
 ```powershell
-cd C:\Users\<you>\ruhmi-model-zoo
+cd C:\Users\<you>\Model-zoo
 python ruhmi_tools\mcu_compile.py vision\object_detection\yolox_tiny\python\config.yaml
 ```
 
 **Ubuntu / bash**
 
 ```bash
-cd ~/ruhmi-model-zoo
+cd ~/Model-zoo
 python ruhmi_tools/mcu_compile.py vision/object_detection/yolox_tiny/python/config.yaml
 ```
 
@@ -189,7 +196,7 @@ The compiled C-code will be written to the `output_dir` specified in `config.yam
 
 ---
 
-## Step 4 — Embedded C Integration
+## Step 5 — Embedded C Integration
 
 The `embedded_c/` folder contains three portable, board-independent files you can drop directly into any bare-metal or RTOS project.
 
@@ -204,7 +211,7 @@ The `embedded_c/` folder contains three portable, board-independent files you ca
 
 ---
 
-### 4.1 — Add files to your project
+### 5.1 — Add files to your project
 
 Copy the following files into your firmware project (or add them as include paths):
 
@@ -224,7 +231,7 @@ Also copy the compiled model artifacts from the appropriate subdirectory into yo
 
 ---
 
-### 4.2 — `model_metadata.h` — Key constants
+### 5.2 — `model_metadata.h` — Key constants
 
 Include this header anywhere you need model-specific values:
 
@@ -254,7 +261,7 @@ Include this header anywhere you need model-specific values:
 
 ---
 
-### 4.3 — Preprocessing — `preprocess()`
+### 5.3 — Preprocessing — `preprocess()`
 
 ```c
 #include "preprocessing.h"
@@ -293,7 +300,7 @@ preprocess(camera_buf, 320, 240,
 
 ---
 
-### 4.4 — Postprocessing — `postprocess()`
+### 5.4 — Postprocessing — `postprocess()`
 
 Decode the raw INT8 output into filtered detections with letterbox undo:
 

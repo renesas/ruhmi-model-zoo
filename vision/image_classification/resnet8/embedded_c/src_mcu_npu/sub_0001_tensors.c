@@ -1,7 +1,7 @@
 #include "sub_0001_tensors.h"
 
 const TensorInfo sub_0001_tensors[] = {
-  { "_split_1_command_stream", 1, 3368, "COMMAND_STREAM", 0xffffffff },
+  { "_split_1_command_stream", 1, 3352, "COMMAND_STREAM", 0xffffffff },
   { "_split_1_flash", 2, 229184, "MODEL", 0xffffffff },
   { "_split_1_scratch", 3, 98304, "ARENA", 0x0 },
   { "_split_1_scratch_fast", 4, 98304, "FAST_SCRATCH", 0x0 },

@@ -16,7 +16,7 @@ tf.get_logger().setLevel("ERROR")
 # Defaults  (paths are relative to the project root, i.e. where this script lives)
 # ──────────────────────────────────────────────────────────────────────────────
 BASE_DIR     = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH   = os.path.join(BASE_DIR, "Model", "mobilenet_v1_FP32.tflite")
+MODEL_PATH   = os.path.join(BASE_DIR, "model", "mobilenet_v1_FP32.tflite")
 LABELS_PATH  = os.path.join(BASE_DIR, "utils", "imagenet_labels.txt")
 
 # inference settings
@@ -89,7 +89,8 @@ def softmax(logits: np.ndarray) -> np.ndarray:
 
 def postprocess(raw_output: np.ndarray,
                 labels:     List[str],
-                top_k:      int = TOP_K) -> List[Tuple[int, str, float]]:
+                top_k:      int = TOP_K,
+                skip_softmax: bool = False) -> List[Tuple[int, str, float]]:
     """
     Convert raw model output to human-readable top-K predictions.
 
@@ -115,15 +116,15 @@ def postprocess(raw_output: np.ndarray,
     # Step 1: squeeze to 1-D
     probs = np.squeeze(raw_output)   # shape (1000,)
 
-    # Step 2: apply softmax only if values don't already look like probabilities.
-    #         Heuristic: if any value is negative OR they don't sum to ~1 then
-    #         the model returned raw logits → apply softmax.
-    already_probabilities = (
-        float(probs.min()) >= 0.0 and
-        np.isclose(float(probs.sum()), 1.0, atol=1e-3)
-    )
-    if not already_probabilities:
-        probs = softmax(probs)
+    # Step 2: apply softmax when needed.
+    # For quantized models with softmax baked in, skip_softmax can be True.
+    if not skip_softmax:
+        already_probabilities = (
+            float(probs.min()) >= 0.0 and
+            np.isclose(float(probs.sum()), 1.0, atol=1e-3)
+        )
+        if not already_probabilities:
+            probs = softmax(probs)
 
     # Step 3: argsort descending, keep top-k
     top_indices = np.argsort(probs)[::-1][:top_k]   # shape (top_k,)
@@ -146,7 +147,8 @@ def run_tflite_inference(model_path:  str,
                          labels:      List[str],
                          top_k:       int = TOP_K) -> List[Tuple[int, str, float]]:
     """
-    Load the TFLite FP32 model and run a single-image inference.
+    Load the TFLite model and run a single-image inference.
+    Automatically handles FP32 and INT8/UINT8 input/output tensors.
 
     Returns
     -------
@@ -159,24 +161,37 @@ def run_tflite_inference(model_path:  str,
     input_details  = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
 
-    # ── Pre-process ──────────────────────────────────────────────────────────
-    input_tensor = preprocess(image_path, INPUT_HEIGHT, INPUT_WIDTH)
+    # ── Auto-detect input size from model and pre-process ───────────────────
+    input_shape = input_details[0]["shape"]  # (1, H, W, 3)
+    height, width = int(input_shape[1]), int(input_shape[2])
+    input_tensor = preprocess(image_path, height, width)
 
-    # Sanity-check: this FP32 model expects float32 input
-    assert input_details[0]["dtype"] == np.float32, (
-        f"Expected float32 input, got {input_details[0]['dtype']}. "
-        "Use the INT8 inference script for quantized models."
-    )
+    # ── Quantize input only when model expects integer tensors ──────────────
+    input_dtype = input_details[0]["dtype"]
+    is_quantized_input = input_dtype in (np.int8, np.uint8)
+    if is_quantized_input:
+        scale, zero_point = input_details[0]["quantization"]
+        qmin, qmax = np.iinfo(input_dtype).min, np.iinfo(input_dtype).max
+        input_tensor = np.clip(
+            np.round(input_tensor / scale) + zero_point,
+            qmin,
+            qmax,
+        ).astype(input_dtype)
 
     # ── Feed input & run ─────────────────────────────────────────────────────
     interpreter.set_tensor(input_details[0]["index"], input_tensor)
     interpreter.invoke()
 
-    # ── Read output ──────────────────────────────────────────────────────────
+    # ── Read and de-quantize output when needed ─────────────────────────────
     raw_output = interpreter.get_tensor(output_details[0]["index"])  # (1, 1000)
+    output_dtype = output_details[0]["dtype"]
+    is_quantized_output = output_dtype in (np.int8, np.uint8)
+    if is_quantized_output:
+        out_scale, out_zero_point = output_details[0]["quantization"]
+        raw_output = (raw_output.astype(np.float32) - out_zero_point) * out_scale
 
     # ── Post-process ─────────────────────────────────────────────────────────
-    results = postprocess(raw_output, labels, top_k)
+    results = postprocess(raw_output, labels, top_k, skip_softmax=is_quantized_output)
 
     return results
 
@@ -186,13 +201,14 @@ def run_tflite_inference(model_path:  str,
 # ──────────────────────────────────────────────────────────────────────────────
 def main():
     parser = argparse.ArgumentParser(
-        description="Single-image TFLite FP32 inference for MobileNetV1.",
+        description="Single-image TFLite inference for MobileNetV1 (FP32/INT8).",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
             "Examples:\n"
             "  python inference.py path/to/image.jpg\n"
             "  python inference.py path/to/image.jpg --top-k 3\n"
-            "  python inference.py path/to/image.jpg --model Model/mobilenet_v1_FP32.tflite\n"
+            "  python inference.py path/to/image.jpg --model model/mobilenet_v1_FP32.tflite\n"
+            "  python inference.py path/to/image.jpg --model model/mobilenet_v1_INT8.tflite\n"
         ),
     )
     parser.add_argument(
@@ -205,7 +221,7 @@ def main():
     )
     parser.add_argument(
         "--model", default=MODEL_PATH,
-        help=f"Path to FP32 TFLite model (default: {MODEL_PATH}).",
+        help=f"Path to TFLite model (FP32/INT8, default: {MODEL_PATH}).",
     )
     parser.add_argument(
         "--labels", default=LABELS_PATH,
@@ -223,7 +239,7 @@ def main():
     # ── Check image argument first ───────────────────────────────────────────
     if image_path is None:
         print("┌─────────────────────────────────────────────────────────┐")
-        print("│              MobileNetV1 — TFLite FP32 Inference        │")
+        print("│              MobileNetV1 — TFLite Inference             │")
         print("├─────────────────────────────────────────────────────────┤")
         print("│  [ERROR] Missing required argument: image               │")
         print("│          Please provide a path to an input image.       │")
@@ -234,7 +250,7 @@ def main():
         print("│    image            Path to input image (JPEG/PNG)      │")
         print("│                                                         │")
         print("│  Options:                                               │")
-        print("│    --model PATH     Path to FP32 TFLite model           │")
+        print("│    --model PATH     Path to TFLite model                │")
         print("│    --labels PATH    Path to imagenet_labels.txt         │")
         print("│    --top-k N        Number of top predictions (def: 5)  │")
         print("│    -h, --help       Show full help message              │")
@@ -267,10 +283,26 @@ def main():
     labels = load_labels(args.labels)
     print(f"Loaded {len(labels)} labels from {args.labels}")
 
+    # ── Detect model type and input size for logging ────────────────────────
+    interp_tmp = tf.lite.Interpreter(model_path=args.model)
+    interp_tmp.allocate_tensors()
+    inp_details = interp_tmp.get_input_details()[0]
+    inp_dtype = inp_details["dtype"]
+    input_shape = inp_details["shape"]  # (1, H, W, 3)
+    input_h, input_w = int(input_shape[1]), int(input_shape[2])
+    del interp_tmp
+
+    if inp_dtype == np.float32:
+        model_type = "FP32"
+    elif inp_dtype in (np.int8, np.uint8):
+        model_type = "INT8"
+    else:
+        model_type = str(inp_dtype)
+
     # ── Run inference ────────────────────────────────────────────────────────
-    print(f"\nModel   : {args.model}")
+    print(f"\nModel   : {args.model}  ({model_type})")
     print(f"Image   : {image_path}")
-    print(f"Input   : ({INPUT_HEIGHT}, {INPUT_WIDTH}, 3)  normalized to [-1, 1]")
+    print(f"Input   : ({input_h}, {input_w}, 3)  normalized to [-1, 1]")
     print(f"Top-K   : {args.top_k}")
     print()
 

@@ -1,6 +1,6 @@
 # =============================================================================
 # MCU Compile Configuration — SqueezeNet 1.1
-# Usage (from repo root): python ruhmi_tools/compile.py vision/image_classification/squeezenet_1_1/python/config.yaml
+# Usage (from repo root): python ruhmi_tools/mcu_compile.py vision/image_classification/squeezenet_1_1/python/config.yaml
 # =============================================================================
 
 # ---------------------------------------------------------------------------

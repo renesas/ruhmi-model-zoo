@@ -1,6 +1,6 @@
 # ============================================================================
 # MCU Compile Configuration — MobileNetV3-Small (minimalistic) 192×192
-# Usage (from repo root): python ruhmi_tools/compile.py vision/image_classification/mobilenetv3/python/config.yaml
+# Usage (from repo root): python ruhmi_tools/mcu_compile.py vision/image_classification/mobilenetv3/python/config.yaml
 # ============================================================================
 
 # ---------------------------------------------------------------------------

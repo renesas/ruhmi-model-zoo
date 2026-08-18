@@ -7,7 +7,7 @@
  *********************************************************************************************************************/
 
 #include "preprocessing.h"
-#include "../common/model_metadata.h"
+#include "model_metadata.h"
 #include <string.h>
 
 #define U8_MAX_VALUE  (255U)

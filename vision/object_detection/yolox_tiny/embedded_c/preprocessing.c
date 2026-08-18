@@ -19,7 +19,7 @@
  */
 
 #include "preprocessing.h"
-#include "../common/model_metadata.h"
+#include "model_metadata.h"
 #include <stddef.h>
 #include <string.h>
 

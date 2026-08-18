@@ -56,17 +56,18 @@ yolo_fastest_1_1/
 
 ## Prerequisites
 
-1. **Python 3.10** installed (see [Install Python 3.10](../../../README.md#install-python-310) in the top-level README for platform-specific steps).
+1. **Python 3.10** installed.
 2. **Inference venv** — navigate to the `python/` directory and create a dedicated virtual environment:
 
     **Windows PowerShell**
+    > **Note:** If venv activation is blocked by PowerShell execution policy ("running scripts is disabled"), run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` in the same PowerShell window, then run the activation command again.
 
     ```powershell
     cd vision\object_detection\yolo_fastest_1_1\python
-    python -m venv .venv_yolof
+    py -3.10 -m venv .venv_yolof
     .\.venv_yolof\Scripts\Activate.ps1
-    pip install --upgrade pip
-    pip install -r requirements.txt
+    python -m pip install --upgrade pip
+    python -m pip install -r requirements.txt
     ```
 
     **Ubuntu / bash**
@@ -137,14 +138,21 @@ Optional flags:
 **Example output:**
 
 ```
-Model   : model/yolo_fastest_1.1.tflite
-Input   : 320 x 320
-Latency : 45.2 ms
-Detected: 3 object(s)
-  -> person           score=0.872  box=[120,45,280,410]
-  -> car              score=0.654  box=[10,200,150,320]
-  -> dog              score=0.523  box=[200,180,310,300]
-Saved   : outputs/sample_result.jpg
+Model   : vision/object_detection/yolo_fastest_1_1/python/model/yolo_fastest_1.1.tflite  [FP32]
+Image   : sample_images/000000000139.jpg  (640×426)
+Latency : 5.5 ms
+Objects : 6
+
+────────────────────────────────────────────────────────────
+    #  Class                   Conf     x1     y1     x2     y2
+────────────────────────────────────────────────────────────
+    1  chair                  0.693    365    198    436    336
+    2  chair                  0.634    292    212    372    328
+    3  chair                  0.434    335    204    407    334
+    4  potted plant           0.391    322    191    350    220
+    5  dining table           0.281    310    200    408    331
+    6  tv                     0.611     15    167    147    285
+────────────────────────────────────────────────────────────
 ```
 
 > By default `inference.py` loads `model/yolo_fastest_1.1.tflite`. Pass `--model model/yolo_fastest_1.1_int8.tflite` to use the INT8 variant.
@@ -179,14 +187,14 @@ Navigate back to the **repository root** and run the compiler with `.mera_venv` 
 **Windows PowerShell**
 
 ```powershell
-cd C:\Users\<you>\ruhmi-model-zoo
+cd C:\Users\<you>\Model-zoo
 python ruhmi_tools\mcu_compile.py vision\object_detection\yolo_fastest\python\config.yaml
 ```
 
 **Ubuntu / bash**
 
 ```bash
-cd ~/ruhmi-model-zoo
+cd ~/Model-zoo
 python ruhmi_tools/mcu_compile.py vision/object_detection/yolo_fastest_1_1/python/config.yaml
 ```
 
@@ -257,12 +265,16 @@ Also copy the compiled model artifacts:
 ```c
 #include "preprocessing.h"
 
-void preprocess(const uint8_t *p_source_image,
-                int source_width, int source_height,
-                int8_t *p_destination_tensor);
+void preprocess(const uint8_t      *p_source_image,
+                uint16_t            source_width,
+                uint16_t            source_height,
+                int8_t             *p_destination_image,
+                uint16_t            destination_width,
+                uint16_t            destination_height,
+                letterbox_params_t *p_params);
 ```
 
-Performs letterbox resize to 320×320 (gray=114 padding), then quantizes using `MODEL_INPUT_SCALE` and `MODEL_INPUT_ZERO_POINT`.
+Performs letterbox resize to 320×320 (gray=114 padding), then quantizes using `MODEL_INPUT_SCALE` and `MODEL_INPUT_ZERO_POINT`. Fills `*p_params` with the scale and padding offsets needed by `postprocess()` to convert detections back to original image coordinates.
 
 ---
 
@@ -271,21 +283,25 @@ Performs letterbox resize to 320×320 (gray=114 padding), then quantizes using `
 ```c
 #include "postprocessing.h"
 
-int postprocess(const int8_t *p_head0_output,
-                const int8_t *p_head1_output,
-                Detection    *p_detections,
-                int           max_detections);
+int32_t postprocess(const int8_t             *p_raw_head0,
+                    const int8_t             *p_raw_head1,
+                    const letterbox_params_t *p_params,
+                    uint32_t                  orig_w,
+                    uint32_t                  orig_h,
+                    float                     score_thresh,
+                    float                     nms_thresh,
+                    Detection_t              *p_out_dets);
 ```
 
 Decodes both anchor-based YOLO heads, applies score filtering and per-class NMS. Returns the number of valid detections.
 
-Each `Detection`:
+Each `Detection_t`:
 ```c
 typedef struct {
-    float x1, y1, x2, y2;   /* bounding box in original image coords */
-    float score;             /* objectness × class confidence */
-    int   class_id;          /* COCO class index (0–79) */
-} Detection;
+    float    x1, y1, x2, y2;   /* bounding box in original image coords */
+    float    score;             /* objectness × class confidence */
+    uint32_t cls_id;            /* COCO class index (0–79) */
+} Detection_t;
 ```
 
 ---

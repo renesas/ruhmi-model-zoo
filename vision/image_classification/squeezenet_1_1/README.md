@@ -59,17 +59,18 @@ squeezenet_1_1/
 
 ## Prerequisites
 
-1. **Python 3.10** installed (see [Install Python 3.10](../../../README.md#install-python-310) in the top-level README for platform-specific steps).
+1. **Python 3.10** installed.
 2. **Inference venv** — navigate to the `python/` directory and create a dedicated virtual environment:
 
     **Windows PowerShell**
+    > **Note:** If venv activation is blocked by PowerShell execution policy ("running scripts is disabled"), run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` in the same PowerShell window, then run the activation command again.
 
     ```powershell
-    cd vision\image_classification\squeezenet\python
-    python -m venv .venv_squeezenet
+    cd vision/image_classification/squeezenet_1_1/python
+    py -3.10 -m venv .venv_squeezenet
     .\.venv_squeezenet\Scripts\Activate.ps1
-    pip install --upgrade pip
-    pip install -r requirements.txt
+    python -m pip install --upgrade pip
+    python -m pip install -r requirements.txt
     ```
 
     **Ubuntu / bash**
@@ -116,7 +117,7 @@ Activate the **inference venv** and navigate to `python/`:
 **Windows PowerShell**
 
 ```powershell
-cd vision\image_classification\squeezenet\python
+cd vision\image_classification\squeezenet_1_1\python
 .\.venv_squeezenet\Scripts\Activate.ps1
 python inference.py --image sample_images/coco_cat.jpg
 ```
@@ -180,14 +181,14 @@ Navigate back to the **repository root** and run the compiler with `.mera_venv` 
 **Windows PowerShell**
 
 ```powershell
-cd C:\Users\<you>\ruhmi-model-zoo
-python ruhmi_tools\mcu_compile.py vision\image_classification\squeezenet\python\config.yaml
+cd C:\Users\<you>\Model-zoo
+python ruhmi_tools\mcu_compile.py vision\image_classification\squeezenet_1_1\python\config.yaml
 ```
 
 **Ubuntu / bash**
 
 ```bash
-cd ~/ruhmi-model-zoo
+cd ~/Model-zoo
 python ruhmi_tools/mcu_compile.py vision/image_classification/squeezenet_1_1/python/config.yaml
 ```
 

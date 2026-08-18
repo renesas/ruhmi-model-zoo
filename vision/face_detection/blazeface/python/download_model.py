@@ -247,8 +247,8 @@ def _load_calib_images(calib_dir: str, n: int) -> list:
     if not files:
         raise FileNotFoundError(
             f"No JPEG/PNG calibration images found under: {calib_dir}\n"
-            "Run python3 download_model.py first — it auto-downloads WIDER FACE\n"
-            "val, or supply --calib-dir pointing to a folder of JPEG/PNG images."
+            "Provide --calib-dir pointing to a folder of JPEG/PNG face images\n"
+            "(for example WIDER FACE validation images)."
         )
     print(f"[INFO] Loading {len(files)} calibration images from {calib_dir}")
 

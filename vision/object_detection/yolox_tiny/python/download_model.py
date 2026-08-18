@@ -3,32 +3,31 @@
 # Copyright (c) Megvii, Inc. and its affiliates.
 # SPDX-License-Identifier: Apache-2.0
 """
-YOLOX-Tiny -- Download, Export to ONNX, Quantize INT8, and Convert to TFLite
+YOLOX-Tiny -- Download .pth, Export to ONNX, and Convert to TFLite FP32/INT8
 ==============================================================================
 Downloads the pre-trained YOLOX-Tiny checkpoint (.pth) from the official YOLOX
-GitHub release, exports it to a single-file ONNX model, quantizes it to INT8
-using ONNX Runtime static quantization, and converts to TFLite FP32/INT8 using
-onnx2tf with COCO val2017 calibration images.
+GitHub release, exports it to ONNX (intermediate), and converts to TFLite FP32/INT8
+using onnx2tf with COCO val2017 calibration images.
 
-All outputs are stored under model/ within this project directory.
+All TFLite outputs are stored under model/ within this project directory.
 
 Pipeline:
   1. Download YOLOX-Tiny .pth from GitHub Releases
   2. PyTorch .pth -> ONNX FP32  (via torch.onnx.export, using local utils/)
-  3. ONNX   FP32 -> ONNX INT8   (via onnxruntime static quantization)
-  4. ONNX   FP32 -> TFLite FP32 (via onnx2tf)
-  5. ONNX   FP32 -> TFLite INT8 (via onnx2tf + TFLite quantization)
+  3. ONNX FP32 -> TFLite FP32  (via onnx2tf)
+  4. ONNX FP32 -> TFLite INT8  (via onnx2tf + TFLite quantization with COCO val2017)
 
 Usage:
-  python download_model.py                          # full pipeline (all models)
-  python download_model.py --mode fp32              # FP32 ONNX only
-  python download_model.py --mode int8              # FP32 + INT8 ONNX
-  python download_model.py --mode tflite            # FP32 ONNX + TFLite FP32/INT8
-  python download_model.py --mode all               # all models
+  python download_model.py                          # full pipeline (FP32 + INT8)
+  python download_model.py --mode fp32              # TFLite FP32 only
+  python download_model.py --mode int8              # TFLite FP32 + INT8
+  python download_model.py --mode both              # same as int8 (default)
   python download_model.py --input-size 416         # export at 416x416 (default)
   python download_model.py --input-size 224         # export at 224x224 (adds _224 suffix)
   python download_model.py --calib-dir /my/images   # custom calibration dir
   python download_model.py --calib-num 200          # number of calibration images
+  python download_model.py --force                  # re-convert even if files exist
+  python download_model.py --skip-convert           # download .pth only, no conversion
 """
 
 import argparse
@@ -55,17 +54,17 @@ OUTPUT_DIR  = "model"
 PTH_PATH    = os.path.join(OUTPUT_DIR, "yolox_tiny.pth")
 
 # YOLOX-Tiny model defaults
-DEFAULT_INPUT_SIZE = 416
+INPUT_SIZE = 224
 
 
-def _model_paths(input_size: int = DEFAULT_INPUT_SIZE):
+def _model_paths(input_size: int = INPUT_SIZE):
     """Return (onnx_fp32, onnx_int8, tflite_fp32, tflite_int8) paths.
 
     When input_size == 416 (default) the names are unchanged for
     backward-compatibility.  For any other size a ``_<size>`` suffix
     is inserted, e.g. ``yolox_tiny_224.onnx``.
     """
-    if input_size == DEFAULT_INPUT_SIZE:
+    if input_size == 416:
         sfx = ""
     else:
         sfx = f"_{input_size}"
@@ -78,7 +77,7 @@ def _model_paths(input_size: int = DEFAULT_INPUT_SIZE):
 
 
 # Legacy global paths (default 416 — kept for imports)
-ONNX_PATH, INT8_PATH, TFLITE_FP32, TFLITE_INT8 = _model_paths(DEFAULT_INPUT_SIZE)
+ONNX_PATH, INT8_PATH, TFLITE_FP32, TFLITE_INT8 = _model_paths(INPUT_SIZE)
 NUM_CLASSES        = 80
 PAD_VALUE          = 114
 
@@ -175,7 +174,7 @@ def ensure_dataset(calib_dir: str = CALIB_DIR) -> str:
 # --------------------------------------------------------------------------
 # Preprocessing (matches inference.py exactly)
 # --------------------------------------------------------------------------
-def preprocess_image(image_path: str, input_size: int = DEFAULT_INPUT_SIZE):
+def preprocess_image(image_path: str, input_size: int = INPUT_SIZE):
     """Load and preprocess a single image for YOLOX-Tiny.
 
     YOLOX convention: letterbox resize with gray (114) padding,
@@ -222,7 +221,7 @@ def download_checkpoint():
     print(f"[OK] Downloaded: {PTH_PATH} ({size_mb:.1f} MB)")
 
 
-def export_onnx(input_size: int = DEFAULT_INPUT_SIZE):
+def export_onnx(input_size: int = INPUT_SIZE):
     """Export the YOLOX-Tiny PyTorch model to ONNX format.
 
     Uses the self-contained model builder in utils/yolox_model.py.
@@ -308,7 +307,7 @@ def export_onnx(input_size: int = DEFAULT_INPUT_SIZE):
     print(f"[OK] ONNX FP32 saved: {onnx_path} ({size_mb:.2f} MB)")
 
 
-def convert_int8(input_size: int = DEFAULT_INPUT_SIZE,
+def convert_int8(input_size: int = INPUT_SIZE,
                  calib_dir: str = CALIB_DIR,
                  calib_num: int = DEFAULT_CALIB_NUM):
     """Quantize the FP32 ONNX model to INT8 using ONNX Runtime static quantization."""
@@ -439,7 +438,7 @@ def convert_int8(input_size: int = DEFAULT_INPUT_SIZE,
 # --------------------------------------------------------------------------
 # Preprocessing for TFLite (NHWC layout)
 # --------------------------------------------------------------------------
-def preprocess_image_nhwc(image_path: str, input_size: int = DEFAULT_INPUT_SIZE):
+def preprocess_image_nhwc(image_path: str, input_size: int = INPUT_SIZE):
     """Load and letterbox-preprocess a single image for TFLite (NHWC).
 
     Returns np.ndarray shape (1, H, W, 3) float32 0-255, or None if unreadable.
@@ -468,17 +467,14 @@ def preprocess_image_nhwc(image_path: str, input_size: int = DEFAULT_INPUT_SIZE)
 # --------------------------------------------------------------------------
 # Convert ONNX -> TFLite FP32
 # --------------------------------------------------------------------------
-def convert_tflite_fp32(input_size: int = DEFAULT_INPUT_SIZE):
+def convert_tflite_fp32(input_size: int = INPUT_SIZE,
+                        force: bool = False):
     """Convert the ONNX FP32 model to TFLite FP32 using onnx2tf."""
     onnx_path, _, tflite_fp32, _ = _model_paths(input_size)
 
-    print("\n" + "=" * 60)
-    print(f"  Convert ONNX FP32 -> TFLite FP32  ({input_size}x{input_size})")
-    print("=" * 60)
-
-    if os.path.isfile(tflite_fp32):
+    if os.path.isfile(tflite_fp32) and not force:
         size_mb = os.path.getsize(tflite_fp32) / 1024 / 1024
-        print(f"[OK] TFLite FP32 already exists: {tflite_fp32} ({size_mb:.1f} MB)")
+        print(f"  [SKIP] TFLite FP32 already exists: {tflite_fp32} ({size_mb:.1f} MB)")
         return
 
     if not os.path.isfile(onnx_path):
@@ -530,19 +526,16 @@ def convert_tflite_fp32(input_size: int = DEFAULT_INPUT_SIZE):
 # --------------------------------------------------------------------------
 # Convert ONNX -> TFLite INT8 (fully quantized)
 # --------------------------------------------------------------------------
-def convert_tflite_int8(input_size: int = DEFAULT_INPUT_SIZE,
+def convert_tflite_int8(input_size: int = INPUT_SIZE,
                         calib_dir: str = CALIB_DIR,
-                        calib_num: int = DEFAULT_CALIB_NUM):
+                        calib_num: int = DEFAULT_CALIB_NUM,
+                        force: bool = False):
     """Convert ONNX FP32 to a fully quantized INT8 TFLite model."""
     onnx_path, _, _, tflite_int8 = _model_paths(input_size)
 
-    print("\n" + "=" * 60)
-    print(f"  Convert ONNX FP32 -> TFLite INT8  ({input_size}x{input_size})")
-    print("=" * 60)
-
-    if os.path.isfile(tflite_int8):
+    if os.path.isfile(tflite_int8) and not force:
         size_mb = os.path.getsize(tflite_int8) / 1024 / 1024
-        print(f"[OK] TFLite INT8 already exists: {tflite_int8} ({size_mb:.1f} MB)")
+        print(f"  [SKIP] TFLite INT8 already exists: {tflite_int8} ({size_mb:.1f} MB)")
         return
 
     if not os.path.isfile(onnx_path):
@@ -648,32 +641,61 @@ def verify_tflite(path: str, tag: str):
 # --------------------------------------------------------------------------
 # Main entry-point
 # --------------------------------------------------------------------------
-def main(mode: str = "all",
-         input_size: int = DEFAULT_INPUT_SIZE,
+def main(mode: str = "both",
+         input_size: int = INPUT_SIZE,
          calib_dir: str = CALIB_DIR,
-         calib_num: int = DEFAULT_CALIB_NUM):
+         calib_num: int = DEFAULT_CALIB_NUM,
+         force: bool = False,
+         skip_convert: bool = False):
+    
+    mode = mode.lower()
+    if mode == "all":  # Alias 'all' to 'both'
+        mode = "both"
+    
     onnx_path, int8_path, tflite_fp32, tflite_int8 = _model_paths(input_size)
 
-    # Download checkpoint
+    # ── Step 1: Download checkpoint (needed for all modes except skip_convert) ──
+    print("\n" + "=" * 60)
+    print("  Step 1: Download YOLOX-Tiny Checkpoint")
+    print("=" * 60)
     download_checkpoint()
+    
+    if skip_convert:
+        print("\n[SKIP] Conversion (--skip-convert).")
+        return
 
-    # Export FP32 ONNX (always needed)
+    # ── Step 2: Export ONNX FP32 (intermediate, not in final output) ──
+    print("\n" + "=" * 60)
+    print("  Step 2: PyTorch .pth → ONNX FP32 (intermediate)")
+    print("=" * 60)
     export_onnx(input_size)
 
-    # Quantize to INT8 ONNX
-    if mode in ("int8", "both", "all"):
-        convert_int8(input_size, calib_dir, calib_num)
-
-    # Convert to TFLite FP32
-    if mode in ("tflite", "all"):
-        convert_tflite_fp32(input_size)
-
-    # Convert to TFLite INT8
-    if mode in ("tflite", "all"):
-        convert_tflite_int8(input_size, calib_dir, calib_num)
-
-    # Verify TFLite models
-    if mode in ("tflite", "all"):
+    # ── Step 3: Convert to TFLite based on mode ──
+    # Mode: fp32 - TFLite FP32 only
+    if mode == "fp32":
+        print("\n" + "=" * 60)
+        print("  Step 3: ONNX FP32 → TFLite FP32")
+        print("=" * 60)
+        convert_tflite_fp32(input_size, force)
+        
+        print("\n" + "=" * 60)
+        print("  TFLite Verification")
+        print("=" * 60)
+        if os.path.isfile(tflite_fp32):
+            verify_tflite(tflite_fp32, "FP32")
+    
+    # Mode: int8 or both - TFLite FP32 + INT8
+    elif mode in ("int8", "both"):
+        print("\n" + "=" * 60)
+        print("  Step 3a: ONNX FP32 → TFLite FP32")
+        print("=" * 60)
+        convert_tflite_fp32(input_size, force)
+        
+        print("\n" + "=" * 60)
+        print("  Step 3b: ONNX FP32 → TFLite INT8")
+        print("=" * 60)
+        convert_tflite_int8(input_size, calib_dir, calib_num, force)
+        
         print("\n" + "=" * 60)
         print("  TFLite Verification")
         print("=" * 60)
@@ -684,12 +706,10 @@ def main(mode: str = "all",
 
     # Summary
     print("\n" + "=" * 60)
-    print(f"  All done!  YOLOX-Tiny Model Files ({input_size}x{input_size}):")
+    print(f"  All done!  YOLOX-Tiny TFLite Model Files ({input_size}x{input_size}):")
     print("=" * 60)
     for label, path in [
         ("PTH  (PyTorch)", PTH_PATH),
-        ("ONNX (FP32)   ", onnx_path),
-        ("ONNX (INT8)   ", int8_path),
         ("TFLite (FP32) ", tflite_fp32),
         ("TFLite (INT8) ", tflite_int8),
     ]:
@@ -705,16 +725,31 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--mode",
-        choices=["fp32", "int8", "tflite", "both", "FP32", "INT8", "BOTH"],
+        choices=["fp32", "int8", "both", "all"],
         default="both",
-        help="Export mode: fp32 (FP32 only), int8 (FP32 + INT8 ONNX), "
-             "tflite (FP32 ONNX + TFLite FP32/INT8), all (everything). Default: all.",
+        help=(
+            "TFLite output mode: "
+            "'fp32' = TFLite FP32 only (smallest model); "
+            "'int8' = TFLite FP32 + INT8 (quantized); "
+            "'both'/'all' = int8 mode (default). "
+            "All produce ONLY TFLite models in model/ directory."
+        ),
+    )
+    parser.add_argument(
+        "--skip-convert",
+        action="store_true",
+        help="Download .pth checkpoint only; skip ONNX export and TFLite conversion.",
+    )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Re-convert even if output TFLite files already exist.",
     )
     parser.add_argument(
         "--input-size",
         type=int,
-        default=224,
-        help=f"Input square size for ONNX/TFLite export (default: {DEFAULT_INPUT_SIZE}). "
+        default=INPUT_SIZE,
+        help=f"Input square size for ONNX/TFLite export (default: {INPUT_SIZE}). "
              f"Non-default sizes add a suffix, e.g. yolox_tiny_224.onnx.",
     )
     parser.add_argument(
@@ -731,4 +766,6 @@ if __name__ == "__main__":
         help=f"Number of calibration images for INT8 quantization (default: {DEFAULT_CALIB_NUM}).",
     )
     args = parser.parse_args()
-    main(args.mode, args.input_size, args.calib_dir, args.calib_num)
+    main(args.mode, args.input_size, args.calib_dir, args.calib_num, 
+         force=args.force, skip_convert=args.skip_convert)
+    

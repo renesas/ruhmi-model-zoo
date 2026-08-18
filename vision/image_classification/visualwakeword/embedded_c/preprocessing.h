@@ -11,7 +11,7 @@
 #define PREPROCESSING_H
 
 #include <stdint.h>
-#include "../common/model_metadata.h"
+#include "model_metadata.h"
 
 /*
  * VWW normalization : pixel / INPUT_NORM_SCALE → [0.0, 1.0]

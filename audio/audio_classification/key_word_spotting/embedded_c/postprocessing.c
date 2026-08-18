@@ -7,7 +7,7 @@
  */
 
 #include "postprocessing.h"
-#include "../common/model_metadata.h"
+#include "model_metadata.h"
 
 #include <stdbool.h>
 #include <math.h>

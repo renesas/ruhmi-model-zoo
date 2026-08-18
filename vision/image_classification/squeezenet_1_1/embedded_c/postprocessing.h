@@ -18,7 +18,7 @@
 #define POSTPROCESSING_H
 
 #include <stdint.h>
-#include "../common/model_metadata.h"
+#include "model_metadata.h"
 
 /**
  * @brief Convert int8 output tensor values to floating-point class p_scores.

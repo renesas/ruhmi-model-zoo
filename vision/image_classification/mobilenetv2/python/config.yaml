@@ -1,6 +1,6 @@
 # =============================================================================
 # MCU Compile Configuration — MobileNetV2 (alpha=1.0)
-# Usage (from repo root): python ruhmi_tools/compile.py vision/image_classification/mobilenetv2/python/config.yaml
+# Usage (from repo root): python ruhmi_tools/mcu_compile.py vision/image_classification/mobilenetv2/python/config.yaml
 # =============================================================================
 
 # ---------------------------------------------------------------------------

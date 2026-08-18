@@ -13,7 +13,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "../common/model_metadata.h"
+#include "model_metadata.h"
 #include "preprocessing.h"
 
 /**

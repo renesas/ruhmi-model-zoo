@@ -27,7 +27,7 @@
 
 #include <stdint.h>
 #include "preprocessing.h"          /* LetterboxParams */
-#include "../common/model_metadata.h"
+#include "model_metadata.h"
 
 #define SIGMOID_ONE_F                    (1.0F)
 #define BOX_HALF_FACTOR                  (0.5F)

@@ -9,7 +9,7 @@
  **********************************************************************************************************************/
 
 #include "preprocessing.h"
-#include "../common/model_metadata.h"
+#include "model_metadata.h"
 
 /*******************************************************************************************************************//**
  * @brief Preprocess an RGB image into MobileNet INT8 input tensor format.
