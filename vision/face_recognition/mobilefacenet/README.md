@@ -37,7 +37,7 @@ Measured on-target (Cortex-M85 @ 1 GHz, Ethos-U55 NPU @ 500 MHz). AI-only latenc
 
 | Memory Configuration | CPU (ms) | NPU (ms) |
 |----------------------|:--------:|:--------:|
-| ‡ OSPI + External SDRAM | 571  | 66 |
+|  OSPI + SRAM | 411  | 20 |
 ---
 
 ## Folder Structure
