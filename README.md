@@ -52,7 +52,7 @@ Top-level structure (important folders):
 1. Install prerequisites & clone repo
 
     - **Python 3.10** — required for all virtual environments.
-    - **Git LFS** — required to download model files (`.tflite`) and pre-built 
+    - **Git LFS** — required to download model files (`.tflite`) and pre-built.
     
     > If you clone without Git LFS installed, model files and embedded C artifacts will be small pointer files instead of real content. Run `git lfs pull` after installing Git LFS to fetch them.
 
