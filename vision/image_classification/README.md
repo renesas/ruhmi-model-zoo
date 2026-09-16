@@ -11,6 +11,7 @@ This directory contains models for the **image classification** task, targeting 
 | MobileNetV3-Small | ImageNet | (1, 192, 192, 3) | 1000 | [Link](mobilenetv3/README.md) |
 | ShuffleNetV2 (x0.5) | ImageNet | (1, 224, 224, 3) | 1000 | [Link](shufflenetv2/README.md) |
 | SqueezeNet 1.1 | ImageNet | (1, 224, 224, 3) | 1000 | [Link](squeezenet_1_1/README.md) |
+| MCUNet | ImageNet | (1, 48, 48, 3) | 1000 | [Link](mcunet/README.md) |
 | ResNet8 | CIFAR-10 | (1, 32, 32, 3) | 10 | [Link](resnet8/README.md) |
 | Visual Wake Words | COCO VWW | (1, 96, 96, 3) | 2 | [Link](visualwakeword/README.md) |
 
@@ -24,6 +25,7 @@ image_classification/
 ├── mobilenetv3/           ← MobileNetV3-Small (192×192, ImageNet)
 ├── shufflenetv2/          ← ShuffleNetV2 x0.5 (ImageNet)
 ├── squeezenet_1_1/        ← SqueezeNet 1.1 (ImageNet)
+├── mcunet/                ← MCUNet (48×48, ImageNet)
 ├── resnet8/               ← ResNet8 (CIFAR-10)
 └── visualwakeword/        ← Visual Wake Words (person/not-person)
 ```

@@ -18,7 +18,7 @@ Each tutorial covers the complete workflow: model acquisition → conversion →
 
 ## Prerequisites
 
-1. **Python 3.10** — see the [top-level README](../README.md#install-python-310) for installation steps.
+1. **Python 3.10** installed.
 2. **Jupyter** — install via `pip install jupyter` or use VS Code's built-in notebook support.
 3. **MERA compiler wheel** — required for compilation sections. The wheel file (`mera-*.whl`) is included in this folder for convenience. Update the path in each notebook's install cell if needed.
 
@@ -29,14 +29,15 @@ Each tutorial covers the complete workflow: model acquisition → conversion →
 1. Create and activate a virtual environment:
 
     **Windows PowerShell**
+    > **Note:** If venv activation is blocked by PowerShell execution policy ("running scripts is disabled"), run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` in the same PowerShell window, then run the activation command again.
 
     ```powershell
     cd tutorials
-    python -m venv .venv_tutorials
+    py -3.10 -m venv .venv_tutorials
     .\.venv_tutorials\Scripts\Activate.ps1
-    pip install --upgrade pip
-    pip install jupyter ipykernel
-    pip install --upgrade ipywidgets
+    python -m pip install --upgrade pip
+    python -m pip install jupyter ipykernel
+    python -m pip install --upgrade ipywidgets
     python -m ipykernel install --name=venv_tutorials --display-name "Python (venv_tutorials)"
     ```
 

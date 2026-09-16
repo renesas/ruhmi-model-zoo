@@ -1,0 +1,10 @@
+
+# Python dependencies
+
+tensorflow>=2.13
+numpy
+librosa>=0.10
+scikit-learn
+tqdm
+
+

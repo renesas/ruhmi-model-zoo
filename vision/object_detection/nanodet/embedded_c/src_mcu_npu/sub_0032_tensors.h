@@ -1,0 +1,23 @@
+#ifndef __SUB_0032_TENSORS_H__
+#define __SUB_0032_TENSORS_H__
+
+#include <stddef.h>
+#include <stdint.h>
+#include "ethosu_common.h"
+
+extern const TensorInfo sub_0032_tensors[];
+extern const size_t sub_0032_tensors_count;
+
+#define kArenaSize_sub_0032 662400
+
+// Addresses for each input and output buffer inside of the arena
+extern const uint32_t sub_0032_address_model_135_tf_compat_v1_transpose_368_transpose_70484_70894;
+extern const uint32_t sub_0032_address_model_135_tf_nn_leaky_relu_100_LeakyRelu_70441;
+extern const uint32_t sub_0032_address_model_135_tf_nn_leaky_relu_82_LeakyRelu_70325;
+extern const uint32_t sub_0032_address_model_135_tf_math_add_244_Add_model_135_tf_nn_convolution_153_convolution_Const_3_70571;
+extern const uint32_t sub_0032_address_model_135_tf_math_add_241_Add_model_135_tf_nn_convolution_151_convolution_Const_2_70587;
+extern const uint32_t sub_0032_address_model_135_tf_math_add_226_Add_model_135_tf_nn_convolution_142_convolution_Const_1_70603;
+extern const uint32_t sub_0032_address_model_135_tf_math_add_211_Add_model_135_tf_nn_convolution_133_convolution_Const_70619;
+
+
+#endif // __SUB_0032_TENSORS_H__

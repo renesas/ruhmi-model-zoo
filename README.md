@@ -19,19 +19,24 @@ Top-level structure (important folders):
 
 - `ruhmi_tools/` — Generic compilation and RUHMI integration code. It contains compilation flows and shared code.
 - `tutorials/` — Notebooks that show end-to-end examples per task. E.g. `Image Classification, Object Detection etc`
-- `vision/` — Vision model collections organized by task (image classification, object detection, face detection).
-- `audio/` — Audio model collections organized by task (audio classification / keyword spotting).
+- `vision/` — Vision model collections organized by task (image classification, object detection, face detection, face recognition, pose estimation).
+- `audio/` — Audio model collections organized by task (audio classification / keyword spotting, noise suppression, speech recognition).
 - `real_time_analytics/` — Real-time analytic model collections organized by task (e.g. anomaly detection).
 
 ## Available Models
 
 | Task | Models | README |
 |------|:------:|--------|
-| Image Classification | 7 | [View models](vision/image_classification/README.md) |
-| Object Detection | 2 | [View models](vision/object_detection/README.md) |
+| Image Classification | 8 | [View models](vision/image_classification/README.md) |
+| Object Detection | 3 | [View models](vision/object_detection/README.md) |
 | Face Detection | 1 | [View models](vision/face_detection/README.md) |
-| Audio Classification | 1 | [View models](audio/audio_classification/README.md) |
-| Anomaly Detection | 1 | [View models](real_time_analytics/anomaly_detection/README.md) |
+| Face Recognition | 1 | [View models](vision/face_recognition/README.md) |
+| Facial Landmark | 1 | [View models](vision/facial_landmark/README.md) |
+| Pose Estimation | 1 | [View models](vision/pose_estimation/README.md) |
+| Audio Classification | 2 | [View models](audio/audio_classification/README.md) |
+| Noise Suppression | 1 | [View models](audio/noise_suppression/README.md) |
+| Speech Recognition | 1 | [View models](audio/speech_recognition/README.md) |
+| Anomaly Detection | 2 | [View models](real_time_analytics/anomaly_detection/README.md) |
 
 > Each task README contains a detailed table of all models with dataset, input shape, accuracy, and per-model links.
 

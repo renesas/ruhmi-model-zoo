@@ -1,0 +1,25 @@
+#ifndef __SUB_0034_TENSORS_H__
+#define __SUB_0034_TENSORS_H__
+
+#include <stddef.h>
+#include <stdint.h>
+#include "ethosu_common.h"
+
+extern const TensorInfo sub_0034_tensors[];
+extern const size_t sub_0034_tensors_count;
+
+#define kArenaSize_sub_0034 476000
+
+// Addresses for each input and output buffer inside of the arena
+extern const uint32_t sub_0034_address_model_135_tf_strided_slice_60_StridedSlice_70620;
+extern const uint32_t sub_0034_address_model_135_tf_strided_slice_61_StridedSlice_70623;
+extern const uint32_t sub_0034_address_model_135_tf_strided_slice_62_StridedSlice_70604;
+extern const uint32_t sub_0034_address_model_135_tf_strided_slice_63_StridedSlice_70607;
+extern const uint32_t sub_0034_address_model_135_tf_strided_slice_64_StridedSlice_70588;
+extern const uint32_t sub_0034_address_model_135_tf_strided_slice_65_StridedSlice_70591;
+extern const uint32_t sub_0034_address_model_135_tf_strided_slice_66_StridedSlice_70572;
+extern const uint32_t sub_0034_address_model_135_tf_strided_slice_67_StridedSlice_70575;
+extern const uint32_t sub_0034_address_StatefulPartitionedCall_0_70628;
+
+
+#endif // __SUB_0034_TENSORS_H__

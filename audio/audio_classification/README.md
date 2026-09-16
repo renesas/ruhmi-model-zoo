@@ -7,13 +7,15 @@ This directory contains models for the **audio classification** task, targeting 
 | Model | Dataset | Input Shape | Classes | README |
 |-------|---------|:-----------:|:-------:|:--------|
 | Keyword Spotting (DS-CNN) | Google Speech Commands v0.02 | (1, 49, 10, 1) | 12 | [Link](key_word_spotting/README.md) |
+| YAMNet | AudioSet | (1, 96, 64) | 521 | [Link](yamnet/README.md) |
 
 ## Directory Structure
 
 ```
 audio_classification/
 ├── README.md              ← This file
-└── key_word_spotting/     ← DS-CNN Keyword Spotting
+├── key_word_spotting/     ← DS-CNN Keyword Spotting
+└── yamnet/                ← YAMNet audio classification
 ```
 
 ## Getting Started

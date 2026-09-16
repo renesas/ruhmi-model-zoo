@@ -8,6 +8,7 @@ This directory contains models for the **object detection** task, targeting the 
 |-------|---------|:-----------:|:-------:|:--------|
 | YOLO-Fastest 1.1 | COCO 2017 | (1, 320, 320, 3) | 80 | [Link](yolo_fastest_1_1/README.md) |
 | YOLOX-Tiny | COCO 2017 | (1, 224, 224, 3) | 80 | [Link](yolox_tiny/README.md) |
+| NanoDet-Plus-m | COCO 2017 | (1, 320, 320, 3) | 80 | [Link](nanodet/README.md) |
 
 ## Directory Structure
 
@@ -15,7 +16,8 @@ This directory contains models for the **object detection** task, targeting the 
 object_detection/
 ├── README.md              ← This file
 ├── yolo_fastest_1_1/      ← YOLO-Fastest 1.1 (CPU-only)
-└── yolox_tiny/            ← YOLOX-Tiny (CPU + NPU)
+├── yolox_tiny/            ← YOLOX-Tiny (CPU + NPU)
+└── nanodet/               ← NanoDet-Plus-m (CPU + NPU)
 ```
 
 ## Getting Started

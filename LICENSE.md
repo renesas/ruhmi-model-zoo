@@ -35,19 +35,28 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 The repository source code is released under BSD-3-Clause (see `LICENSE`).
 Third-party models and data/assets remain under their original licenses.
 
-| Use Case | Model License | Sample Inputs Included in GitHub | Validation/Calibration Dataset Used by Scripts |
-|----------|---------------|-----------------------------------|-----------------------------------------------|
-| MobileNetV1 (Image Classification) | Apache 2.0 (TensorFlow/Keras weights) | COCO sample images in `sample_images/` (CC-BY 4.0) | ImageNet-1k validation set from image-net.org (Terms of Access; user-provided for INT8) |
-| MobileNetV2 (Image Classification) | Apache 2.0 (TensorFlow/Keras weights) | COCO sample images in `sample_images/` (CC-BY 4.0) | ImageNet-1k validation set from image-net.org (Terms of Access; user-provided for INT8) |
-| MobileNetV3 (Image Classification) | Apache 2.0 (TensorFlow/Keras weights) | COCO sample images in `sample_images/` (CC-BY 4.0) | ImageNet-1k validation set from image-net.org (Terms of Access; user-provided for INT8) |
-| ShuffleNetV2 (Image Classification) | BSD-3-Clause (torchvision weights) | COCO sample images in `sample_images/` (CC-BY 4.0) | ImageNet-1k validation set from image-net.org (restricted/research-use terms; user-provided for INT8) |
-| SqueezeNet 1.1 (Image Classification) | BSD-3-Clause (torchvision weights) | COCO sample images in `sample_images/` (CC-BY 4.0) | ImageNet-1k validation set from image-net.org (Terms of Access; user-provided for INT8) |
-| ResNet8 (Image Classification) | Apache 2.0 (MLCommons Tiny) | CIFAR-10 sample images in `sample_images/` (dataset terms) | CIFAR-10 dataset from University of Toronto (dataset terms) |
-| Visual Wake Words (Image Classification) | Apache 2.0 (MLCommons Tiny) | COCO sample images in `sample_images/` (CC-BY 4.0) | COCO val2014 images/annotations (CC-BY 4.0; auto-downloaded if missing) |
-| YOLO-Fastest 1.1 (Object Detection) | MIT | COCO sample images in `sample_images/` (CC-BY 4.0) | COCO dataset for calibration/evaluation (CC-BY 4.0) |
-| YOLOX-Tiny (Object Detection) | Apache 2.0 (Megvii YOLOX) | COCO sample images in `sample_images/` (CC-BY 4.0) | COCO 2017 dataset for calibration/validation (CC-BY 4.0) |
-| BlazeFace Front (Face Detection) | Apache 2.0 (MediaPipe/PINTO) | WIDER FACE sample images in `sample_images/` | WIDER FACE dataset for validation (Creative Common License) |
-| Keyword Spotting DS-CNN (Audio Classification) | Apache 2.0 (MLCommons Tiny) | Speech Commands sample audio in `sample_audio/` (CC-BY 4.0) | Google Speech Commands v0.02 (CC-BY 4.0; downloaded via tfds when needed) |
-| Auto Encoder (Anomaly Detection) | Apache 2.0 (MLCommons Tiny) | DCASE ToyCar sample audio in `sample_audio/` (CC-BY-SA 4.0) | DCASE 2020 Task 2 ToyCar dataset from Zenodo (CC-BY-SA 4.0) |
+| Use Case | Model License | Sample Inputs Included in GitHub |
+|----------|---------------|----------------------------------|
+| MobileNetV1 (Image Classification) | Apache 2.0 (TensorFlow/Keras weights) | COCO sample images in `sample_images/` (CC-BY 4.0) |
+| MobileNetV2 (Image Classification) | Apache 2.0 (TensorFlow/Keras weights) | COCO sample images in `sample_images/` (CC-BY 4.0) |
+| MobileNetV3 (Image Classification) | Apache 2.0 (TensorFlow/Keras weights) | COCO sample images in `sample_images/` (CC-BY 4.0) |
+| ShuffleNetV2 (Image Classification) | BSD-3-Clause (torchvision weights) | COCO sample images in `sample_images/` (CC-BY 4.0) |
+| SqueezeNet 1.1 (Image Classification) | BSD-3-Clause (torchvision weights) | COCO sample images in `sample_images/` (CC-BY 4.0) |
+| ResNet8 (Image Classification) | Apache 2.0 (MLCommons Tiny) | CIFAR-10 sample images in `sample_images/` (dataset terms) |
+| Visual Wake Words (Image Classification) | Apache 2.0 (MLCommons Tiny) | COCO sample images in `sample_images/` (CC-BY 4.0) |
+| YOLO-Fastest 1.1 (Object Detection) | MIT | COCO sample images in `sample_images/` (CC-BY 4.0) |
+| YOLOX-Tiny (Object Detection) | Apache 2.0 (Megvii YOLOX) | COCO sample images in `sample_images/` (CC-BY 4.0) |
+| BlazeFace Front (Face Detection) | Apache 2.0 (MediaPipe/PINTO) |COCO sample images in `sample_images/` (CC-BY 4.0) |
+| Keyword Spotting DS-CNN (Audio Classification) | Apache 2.0 (MLCommons Tiny) | Speech Commands sample audio in `sample_audio/` (CC-BY 4.0) |
+| Auto Encoder (Anomaly Detection) | Apache 2.0 (MLCommons Tiny) | No sample audio included (DCASE 2020 CC-BY-SA 4.0; user-provided) |
+| MCUNet (Image Classification) | MIT (MIT HAN Lab) | No sample images included (ImageNet Terms of Access prohibit redistribution; user-provided via [image-net.org](https://image-net.org/download.php)) |
+| NanoDet-Plus-m (Object Detection) | Apache 2.0 (RangiLyu/nanodet) | COCO sample images in `sample_images/` (CC-BY 4.0) |
+| MobileFaceNet (Face Recognition) | Apache 2.0 (foamliu/MobileFaceNet) | No sample images included (LFW is research use only; user-provided) |
+| MediaPipe Face Landmark (Facial Landmark) | Apache 2.0 (Google MediaPipe / patlevin/face-detection-tflite MIT) | COCO sample images in `sample_images/` (CC-BY 4.0) |
+| PoseNet MobileNetV1-0.5 (Pose Estimation) | Apache 2.0 (tensorflow/tfjs-models) | COCO sample images in `sample_images/` (CC-BY 4.0) |
+| YAMNet (Audio Classification) | Apache 2.0 (Google / TensorFlow Hub) | AudioSet sample clips in `sample_audio/` (CC-BY 4.0) |
+| RNNoise (Noise Suppression) | Apache 2.0 (Arm ML Model Zoo) | Edinburgh Noisy Speech sample audio in `sample_audio/` (CC-BY 4.0) |
+| TinyWav2Letter (Speech Recognition) | Apache 2.0 (Arm ML-zoo) | No sample audio included (Fluent Speech Datasets is research use only; user-provided) |
+| AD MicroNet Medium (Anomaly Detection) | Apache 2.0 (Arm ML-zoo) | No sample audio included (DCASE 2020 Task 2 Slider is CC-BY-SA 4.0; user-provided, fetched by `download_model.py` from [Zenodo #3678171](https://zenodo.org/record/3678171)) |
 
 > Verify current upstream license terms before redistribution in your target product, geography, and commercial context.

@@ -80,7 +80,7 @@ anomaly_detection/
     pip install -r requirements.txt
     ```
 
-3. **Compiler venv** (`.mera_venv`) — required only for [Step 4](#step-4--compile-for-ra8p1-ruhmi). See the [top-level README](../../README.md) for setup instructions.
+3. **Compiler venv** (`.mera_venv`) — required only for [Step 4](#step-4--compile-for-ra8p1-ruhmi). See the [top-level README](../../../README.md) for setup instructions.
 
 ---
 
@@ -90,7 +90,7 @@ The TFLite models are already provided in `python/model/`. To regenerate them fr
 
 ---
 
-## Step 2 — Convert to TFLite
+## Step 2 — Build the Models
 
 Use `download_model.py` to build and convert the model. Activate the **inference venv** and navigate to `python/`.
 
@@ -108,12 +108,15 @@ The script will automatically download the Keras `.h5` model from MLCommons Tiny
 
 Activate the **inference venv** and navigate to `python/`:
 
+> [!NOTE]
+> No sample audio is bundled due to licensing restrictions (DCASE 2020 dataset is for non-commercial use only). Download source audio if needed from [Zenodo #3678171](https://zenodo.org/record/3678171) and provide your own WAV file recorded at 16 kHz mono.
+
 **Windows PowerShell**
 
 ```powershell
 cd real_time_analytics\anomaly_detection\auto_encoder\python
-.\.venv_ad\Scripts\Activate.ps1
-python inference.py --audio sample_audio\anomaly_id_01_00000000.wav
+.\venv_ad\Scripts\Activate.ps1
+python inference.py --audio path\to\your_audio.wav
 ```
 
 **Ubuntu / bash**
@@ -121,7 +124,7 @@ python inference.py --audio sample_audio\anomaly_id_01_00000000.wav
 ```bash
 cd real_time_analytics/anomaly_detection/auto_encoder/python
 source .venv_ad/bin/activate
-python inference.py --audio sample_audio/anomaly_id_01_00000000.wav
+python inference.py --audio path/to/your_audio.wav
 ```
 
 Optional flags:
@@ -138,7 +141,7 @@ Optional flags:
 ==================================================
   ANOMALY DETECTION RESULT
 ==================================================
-  Audio file     : anomaly_id_01_00000000.wav
+  Audio file     : your_audio.wav
   Model          : ad01_FP32.tflite (FP32)
   Feature vectors: 196
   Anomaly score  : 14.283195

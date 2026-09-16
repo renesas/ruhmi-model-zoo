@@ -1,0 +1,2 @@
+# Copyright 2026 Renesas Electronics Corporation
+# SPDX-License-Identifier: Apache-2.0

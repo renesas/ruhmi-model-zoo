@@ -1,0 +1,5 @@
+mtcnn==1.0.0
+numpy==1.26.4
+Pillow==12.3.0
+tensorflow==2.19.0
+tqdm==4.67.3

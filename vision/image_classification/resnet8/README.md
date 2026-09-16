@@ -107,7 +107,7 @@ wget -O model/pretrainedResnet.h5 \
 
 ---
 
-## Step 2 — Convert to TFLite
+## Step 2 — Build the Models
 
 Use `download_model.py` to convert the Keras `.h5` model to TFLite format. Make sure the **inference venv** (`.venv_resnet`) is active and you are in the `python/` directory.
 

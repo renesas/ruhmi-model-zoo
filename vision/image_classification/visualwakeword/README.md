@@ -101,7 +101,7 @@ The TFLite models are already provided in `python/model/`. To regenerate them fr
 
 ---
 
-## Step 2 — Convert to TFLite
+## Step 2 — Build the Models
 
 Use `download_model.py` to download `vww_96.h5` from MLCommons Tiny and convert it to TFLite. Make sure the **inference venv** (`.venv_vww`) is active and you are in the `python/` directory.
 

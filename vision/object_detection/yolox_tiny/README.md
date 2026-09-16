@@ -88,7 +88,7 @@ The TFLite models are already provided in `python/model/`. To regenerate them fr
 
 ---
 
-## Step 2 — Convert to TFLite
+## Step 2 — Build the Models
 
 Use `download_model.py` to download the PyTorch checkpoint and convert to TFLite. Activate the **inference venv** and navigate to `python/`.
 

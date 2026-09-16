@@ -7,13 +7,15 @@ This directory contains models for the **anomaly detection** task, targeting the
 | Model | Dataset | Input Shape | Metric | README |
 |-------|---------|:-----------:|:------:|:--------|
 | AD Dense Autoencoder (ad01) | DCASE 2020 Task 2 — ToyCar | (1, 640) | AUC / pAUC | [Link](auto_encoder/README.md) |
+| AD MicroNet Medium (INT8) | DCASE 2020 Task 2 — Slider | (1, 32, 32, 1) | AUC / pAUC | [Link](micronet/README.md) |
 
 ## Directory Structure
 
 ```
 anomaly_detection/
 ├── README.md              ← This file
-└── auto_encoder/          ← AD Dense Autoencoder
+├── auto_encoder/          ← AD Dense Autoencoder
+└── micronet/              ← AD MicroNet Medium INT8
 ```
 
 ## Getting Started
