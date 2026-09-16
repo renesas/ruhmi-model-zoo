@@ -57,6 +57,6 @@ Third-party models and data/assets remain under their original licenses.
 | YAMNet (Audio Classification) | Apache 2.0 (Google / TensorFlow Hub) | AudioSet sample clips in `sample_audio/` (CC-BY 4.0) |
 | RNNoise (Noise Suppression) | Apache 2.0 (Arm ML Model Zoo) | Edinburgh Noisy Speech sample audio in `sample_audio/` (CC-BY 4.0) |
 | TinyWav2Letter (Speech Recognition) | Apache 2.0 (Arm ML-zoo) | No sample audio included (Fluent Speech Datasets is research use only; user-provided) |
-| AD MicroNet Medium (Anomaly Detection) | Apache 2.0 (Arm ML-zoo) | No sample audio included (DCASE 2020 Task 2 Slider is CC-BY-SA 4.0; user-provided, fetched by `download_model.py` from [Zenodo #3678171](https://zenodo.org/record/3678171)) |
+| AD MicroNet Medium (Anomaly Detection) | Apache 2.0 (Arm ML-zoo) | No sample audio included (DCASE 2020 Task 2 Slider is CC-BY-SA 4.0; user-provided |
 
 > Verify current upstream license terms before redistribution in your target product, geography, and commercial context.
