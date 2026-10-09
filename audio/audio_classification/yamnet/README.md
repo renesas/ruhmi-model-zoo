@@ -40,11 +40,11 @@ Evaluated on the AudioSet HF 20k test set (18,877 clips, clip-score pooling: mea
 
 ### Inference Performance (RA8P1)
 
-Measured on-target (Cortex-M85 @ 1 GHz, Ethos-U55 NPU @ 500 MHz). AI-only latency per inference call.
+Measured on-target (Cortex-M85 @ 1 GHz, Ethos-U55 NPU @ 500 MHz). AI-only latency per model invocation.
 
-| Memory Configuration | CPU (ms) | NPU (ms) |
+| Memory Configuration | CPU (ms) | CPU+NPU (ms) |
 |----------------------|:--------:|:--------:|
-| ‡ OSPI + External SDRAM | 386 | 8 |
+| ‡ OSPI + External SDRAM | 386.96 | 8.74 |
 ---
 
 ## Folder Structure

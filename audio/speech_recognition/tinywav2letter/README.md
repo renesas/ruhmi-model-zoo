@@ -42,11 +42,11 @@ LER = Letter Error Rate; WER = Word Error Rate; Exact Match = fraction of uttera
 
 ### Inference Performance (RA8P1)
 
-Measured on-target (Cortex-M85 @ 1 GHz, Ethos-U55 NPU @ 500 MHz). AI-only latency per 10 ms frame.
+Measured on-target (Cortex-M85 @ 1 GHz, Ethos-U55 NPU @ 500 MHz). AI-only latency per model invocation (296-frame feature window).
 
-| Memory Configuration | CPU (ms) | NPU (ms) |
+| Memory Configuration | CPU (ms) | CPU+NPU (ms) |
 |----------------------|:--------:|:--------:|
-| † Internal Flash + Internal SRAM | 943.08  | 43.663 |
+| † Internal Flash + Internal SRAM | 943.08 | 43.66 |
 
 ---
 

@@ -34,11 +34,11 @@ Evaluated on the DCASE 2020 Task 2 slider dev-test (four machine IDs, macro-aver
 
 ### Inference Performance (RA8P1)
 
-Measured on-target (Cortex-M85 @ 1 GHz, Ethos-U55 NPU @ 500 MHz). AI-only latency per 32×32 patch (single forward pass).
+Measured on-target (Cortex-M85 @ 1 GHz, Ethos-U55 NPU @ 500 MHz). AI-only latency per model invocation (one 32×32 patch).
 
-| Memory Configuration | CPU (ms) | NPU (ms) |
+| Memory Configuration | CPU (ms) | CPU+NPU (ms) |
 |----------------------|:--------:|:--------:|
-| † Internal Flash + Internal SRAM | 33.975 | 1.261 |
+| † Internal Flash + Internal SRAM | 33.98 | 1.26 |
 ---
 
 ## Folder Structure

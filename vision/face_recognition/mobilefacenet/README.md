@@ -33,11 +33,11 @@ MobileFaceNet ([Chen et al., 2018](https://arxiv.org/abs/1804.07573)) is a compa
 
 ### Inference Performance (RA8P1)
 
-Measured on-target (Cortex-M85 @ 1 GHz, Ethos-U55 NPU @ 500 MHz). AI-only latency per face embedding inference.
+Measured on-target (Cortex-M85 @ 1 GHz, Ethos-U55 NPU @ 500 MHz). AI-only latency per model invocation (one face embedding).
 
-| Memory Configuration | CPU (ms) | NPU (ms) |
+| Memory Configuration | CPU (ms) | CPU+NPU (ms) |
 |----------------------|:--------:|:--------:|
-|  OSPI + SRAM | 411  | 20 |
+|  OSPI + SRAM | 411.92 | 20.93 |
 ---
 
 ## Folder Structure

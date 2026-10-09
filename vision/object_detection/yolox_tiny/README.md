@@ -33,11 +33,11 @@ Accuracy measured on the COCO 2017 validation set (5000 images, 224×224 input).
 
 ### Inference Performance (RA8P1)
 
-Measured on-target (Cortex-M85 @ 1 GHz, Ethos-U55 NPU @ 500 MHz). AI-only latency.
+Measured on-target (Cortex-M85 @ 1 GHz, Ethos-U55 NPU @ 500 MHz). AI-only latency per model invocation.
 
-| Memory Configuration | CPU (ms) | NPU (ms) |
+| Memory Configuration | CPU (ms) | CPU+NPU (ms) |
 |----------------------|:--------:|:--------:|
-| ‡ OSPI + External SDRAM | 1914 | 73 |
+| ‡ OSPI + External SDRAM | 1914.89 | 73.39 |
 
 ---
 

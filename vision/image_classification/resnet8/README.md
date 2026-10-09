@@ -32,11 +32,11 @@ Accuracy measured on the CIFAR-10 test set (10 000 images).
 
 ### Inference Performance (RA8P1)
 
-Measured on-target (Cortex-M85 @ 1 GHz, Ethos-U55 NPU @ 500 MHz). AI-only latency.
+Measured on-target (Cortex-M85 @ 1 GHz, Ethos-U55 NPU @ 500 MHz). AI-only latency per model invocation.
 
-| Memory Configuration | CPU (ms) | NPU (ms) |
+| Memory Configuration | CPU (ms) | CPU+NPU (ms) |
 |----------------------|:--------:|:--------:|
-| † Internal Flash + Internal SRAM | 12 | 0.640 |
+| † Internal Flash + Internal SRAM | 12.38 | 0.64 |
 | ¶ Internal SRAM only | 12 | 0.640 |
 
 ---

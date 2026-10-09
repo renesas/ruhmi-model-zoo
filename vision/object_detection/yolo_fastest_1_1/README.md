@@ -36,11 +36,11 @@ Evaluated on COCO val2017 (4952 images), mAP computed at IoU=0.5 and IoU=0.5:0.9
 
 ### Inference Performance (RA8P1)
 
-Measured on-target (Cortex-M85 @ 1 GHz). AI-only latency. **CPU-only — NPU not supported yet.**
+Measured on-target (Cortex-M85 @ 1 GHz). AI-only latency per model invocation. **CPU-only — NPU not supported yet.**
 
 | Memory Configuration | CPU (ms) |
 |----------------------|:--------:|
-| † Internal Flash + Internal SRAM | 368 ms |
+| † Internal Flash + Internal SRAM | 368.72 |
 ---
 
 ## Folder Structure

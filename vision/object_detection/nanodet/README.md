@@ -34,11 +34,11 @@ Accuracy measured on the COCO val2017 set (5,000 images, 80 classes). Metric: CO
 > [!NOTE]
 > The model was compiled using `mera-2.6.0+pkg.4815` and `FSP 6.5.1` was used for building and testing the project.
 
-Measured on-target (Cortex-M85 @ 1 GHz, Ethos-U55 NPU @ 500 MHz). AI-only latency per 320×320 frame.
+Measured on-target (Cortex-M85 @ 1 GHz, Ethos-U55 NPU @ 500 MHz). AI-only latency per model invocation (320×320 frame).
 
-| Memory Configuration | CPU (ms) | NPU (ms) |
+| Memory Configuration | CPU (ms) | CPU+NPU (ms) |
 |----------------------|:--------:|:--------:|
-| ‡ OSPI + External SDRAM | 3520  | 1000 |
+| ‡ OSPI + External SDRAM | 3522.48 | 1000.48 |
 
 ---
 

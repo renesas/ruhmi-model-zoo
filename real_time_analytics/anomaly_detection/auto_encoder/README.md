@@ -33,11 +33,11 @@ Evaluated on the DCASE 2020 Task 2 ToyCar test set (all machine IDs).
 
 ### Inference Performance (RA8P1)
 
-Measured on-target (Cortex-M85 @ 1 GHz, Ethos-U55 NPU @ 500 MHz). AI-only latency per feature vector (single forward pass of 640→640 autoencoder).
+Measured on-target (Cortex-M85 @ 1 GHz, Ethos-U55 NPU @ 500 MHz). AI-only latency per model invocation (one feature vector through the 640→640 autoencoder).
 
-| Memory Configuration | CPU (ms) | NPU (ms) |
+| Memory Configuration | CPU (ms) | CPU+NPU (ms) |
 |----------------------|:--------:|:--------:|
-| † Internal Flash + Internal SRAM | 0.226 | 0.132 |
+| † Internal Flash + Internal SRAM | 0.23 | 0.13 |
 | ¶ Internal SRAM only | 0.225 | 0.133 |
 
 ---

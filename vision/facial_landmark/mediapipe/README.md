@@ -34,12 +34,12 @@ Accuracy measured on the iBUG 300W testset (68-point landmarks). Metric: Interoc
 
 ## Inference Performance (RA8P1)
 
-Measured on-target (Cortex-M85 @ 1 GHz, Ethos-U55 NPU @ 500 MHz). AI-only latency per 192×192 face crop (single forward pass of the landmark model; MTCNN pre-stage runs on the host).
+Measured on-target (Cortex-M85 @ 1 GHz, Ethos-U55 NPU @ 500 MHz). AI-only latency per model invocation (192×192 face crop; MTCNN pre-stage runs on the host).
 
-| Memory Configuration | CPU (ms) | NPU (ms) |
+| Memory Configuration | CPU (ms) | CPU+NPU (ms) |
 |----------------------|:--------:|:--------:|
-| † Internal Flash + Internal SRAM | 104 | - |
-| ‡ OSPI + External SDRAM | - | 125 |
+| † Internal Flash + Internal SRAM | 104.64 | — |
+| ‡ OSPI + External SDRAM | — | 125.72 |
 
 > [!Note]
 > NPU execution was slower due to the partitioning to multiple subgraphs. This issue is fixed in latest MCU compiler release with Vela 5.1.0

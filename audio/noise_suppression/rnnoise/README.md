@@ -34,11 +34,11 @@ Validation performed on the Edinburgh Noisy Speech Database (824 clean/noisy WAV
 
 ### Inference Performance (RA8P1)
 
-Measured on-target (Cortex-M85 @ 1 GHz, Ethos-U55 NPU @ 500 MHz). AI-only latency per 10 ms frame.
+Measured on-target (Cortex-M85 @ 1 GHz, Ethos-U55 NPU @ 500 MHz). AI-only latency per model invocation (one 10 ms audio frame).
 
-| Memory Configuration | CPU (ms) | NPU (ms) |
+| Memory Configuration | CPU (ms) | CPU+NPU (ms) |
 |----------------------|:--------:|:--------:|
-| † Internal Flash + Internal SRAM | 0.293 | 0.068 |
+| † Internal Flash + Internal SRAM | 0.29 | 0.07 |
 | ¶ Internal SRAM only | 0.290 | 0.068 |
 
 ---
